@@ -3,18 +3,21 @@ require 'fy'
 fs = require 'fs'
 {execSync} = require 'child_process'
 src_path = "src"
+argv = require('minimist')(process.argv.slice(2))
+
 # ###################################################################################################
 #    utils
 # ###################################################################################################
 unpack_include = (code)->
   while reg_ret = /\#include \"([^\"]*)\"/.exec code
     [_skip, file] = reg_ret
-    p "unfold #include \"#{file}\""
+    puts "unfold #include \"#{file}\""
     code = code.replace "#include \"#{file}\"", fs.readFileSync "#{src_path}/#{file}", 'utf-8'
   code
 
 strip_comments = (code)->
-  code = code.replace /\n\/\/.*/g, ''
+  code = code.replace /\/\*((?!\*\/)[\s\S])+\*\//g, ''
+  code = code.replace /\n\s*\/\/.*/g, ''
 
 strip_empty_lines = (code)->
   code = code.replace /\n{2,}/g, '\n'
@@ -39,20 +42,36 @@ str2tok = (str)->
     cur_tok.code += str[0]
     str = str.slice 1
     return
+  eat_regex = (type, regex, join=false)->
+    if !join
+      ret.push cur_tok
+    [token] = regex.exec str
+    str = str.slice token.length
+    if !join
+      ret.push {
+        type
+        code: token
+      }
+      rst()
+    else
+      cur_tok.code += token
+    return
   # ineffective as hell
   while str.length
     switch str[0]
+      when '/'
+        switch str[1]
+          when "/" # //
+            eat_regex 'raw', /^\/\/.*/, true
+          when "*" # /*
+            eat_regex 'raw', /^\/\*((?!\*\/)[\s\S])+\*\//, true
+          else
+            default_fn()
       when '#'
-        if !/\#include/.test str
+        if !reg_ret = /^\#(include|define).*/.exec str
           default_fn()
           break
-        ret.push cur_tok
-        [include_token] = /#include.*/.exec str
-        ret.push {
-          type: 'include'
-          code: include_token
-        }
-        str = str.slice include_token.length
+        eat_regex 'include', /^\#(include|define).*/
         rst()
         
       when '"'
@@ -96,26 +115,30 @@ prop_fill = (str)->
     prop_hash[word]++
   str
 
-prop_print = ()->
+_prop_print = (letter_count)->
   kv_list = []
   for k,v of prop_hash
-    continue if v <= 1
+    continue if v <= 2
     kv_list.push {k,v}
 
   kv_list.sort (a,b)->a.v-b.v
+  puts "#{letter_count} letter"
   for kv in kv_list
     {k,v} = kv
     potential_win = 0
-    potential_win_extra = -"#define AA #{k}".length
-    potential_win += v*(k.length - 2)
+    potential_win_extra = -"#define  #{k}\n".length-letter_count
+    potential_win += v*(k.length - letter_count)
     continue if potential_win <= 0
-    p [
-      k.rjust 20
+    puts [
+      k.rjust 30
       "=>"
       v.rjust 3
       potential_win.rjust 5
       (potential_win+potential_win_extra).rjust 5
     ].join ' '
+prop_print = ()->
+  _prop_print 1
+  _prop_print 2
   return
 # ###################################################################################################
 
@@ -123,10 +146,12 @@ main = fs.readFileSync "#{src_path}/main.cpp", 'utf-8'
 main = unpack_include main
 
 tok_list = str2tok main
-tok_map tok_list, strip_comments
-tok_map tok_list, strip_empty_lines
-tok_map tok_list, strip_token_and_new_line
-tok_map tok_list, strip_operator_space
+p tok_list
+unless argv.skip_pack
+  tok_map tok_list, strip_comments
+  tok_map tok_list, strip_empty_lines
+  tok_map tok_list, strip_token_and_new_line
+  tok_map tok_list, strip_operator_space
 
 # ###################################################################################################
 #    TODO autopacker here
@@ -134,28 +159,16 @@ tok_map tok_list, strip_operator_space
 ###
 // type related
 #define I int
-#define S string
-#define C const
-// server related
-#define sVt serverVersion_t
-#define bAAM bindAndAddMethod
 // JSON
 #define PBN PARAMS_BY_NAME
 #define JI JSON_INTEGER
-#define JS JSON_STRING
 #define V Value
 #define aS asString
 // control flow and structures
 #define P public
 #define R return
-
-
 // blockchain related
-// from_address = fA
-// to_address = tA
-// address = A
 // amount = w (wei)
-// balance = B
 // transaction = T
 // transactionI = T
 ###
@@ -169,8 +182,8 @@ hard_replace = (k, v)->
   hard_replace_map[k] = true
 
 # type related
-soft_replace "const", "C"
-soft_replace "string", "S"
+# soft_replace "const", "C"
+# soft_replace "string", "S"
 # server related
 hard_replace "MyServer", "MS"
 hard_replace "TemplateServer", "TS"
@@ -179,6 +192,7 @@ soft_replace "AbstractServerConnector", "ASC"
 hard_replace "request", "rq"
 hard_replace "response", "rs"
 hard_replace "connector", "c"
+hard_replace "conn", "c"
 # soft_replace "bindAndAddMethod", "bAAM"
 soft_replace "bindAndAddMethod", "bM"
 soft_replace "serverVersion_t", "sVt"
@@ -188,22 +202,26 @@ soft_replace "JSON_STRING", "JS"
 # reserved words
 soft_replace "virtual", "V"
 hard_replace "NULL", "0"
-soft_replace "using namespace", "UN"
+# soft_replace "using namespace", "UN"
+soft_replace "using namespace", "U" # SHORTER TMP
 
 # blockchain related
 hard_replace "to_address", "tA"
 hard_replace "from_address", "fA"
 hard_replace "transaction", "tx"
+hard_replace "transactionI", "tx"
 hard_replace "address", "A"
 hard_replace "balance", "B"
+hard_replace "balanceI", "B"
 
-for k,v of replace_map
-  tok_map tok_list, (str)->
-    if /\s/.test k
-      regex = new RegExp(RegExp.escape(k), "g")
-    else
-      regex = new RegExp("\\b"+RegExp.escape(k)+"\\b", "g")
-    str = str.replace regex, v
+unless argv.skip_pack
+  for k,v of replace_map
+    tok_map tok_list, (str)->
+      if /\s/.test k
+        regex = new RegExp(RegExp.escape(k), "g")
+      else
+        regex = new RegExp("\\b"+RegExp.escape(k)+"\\b", "g")
+      str = str.replace regex, v
 
 jl = []
 for k,v of replace_map

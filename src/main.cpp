@@ -1,9 +1,12 @@
+#define u64 unsigned long long
+#define u8 unsigned char
 #include<cstdio>
 #include<filesystem>
 #include<iostream>
 #include<thread>
 #include<jsonrpccpp/server.h>
 #include<jsonrpccpp/server/connectors/httpserver.h>
+#include "keccak.c"
 using namespace std;
 using namespace jsonrpc;
 using namespace Json;
@@ -31,10 +34,10 @@ class TemplateServer : public AbstractServer<TemplateServer> {
     response = balance(request["address"].asString());
   }
   virtual void transactionI(const Value &request,
-                                   Value &response) {
-    response = transaction(request["amount"].asInt(),
-                                 request["from_address"].asString(),
-                                 request["to_address"].asString());
+                            Value &response) {
+    response = transaction( request["amount"].asInt(),
+                            request["from_address"].asString(),
+                            request["to_address"].asString());
   }
   virtual int balance(const string &address) = 0;
   virtual string transaction(int amount, const string &from_address,
@@ -47,8 +50,9 @@ class MyServer : public TemplateServer {
                serverVersion_t type);
 
   int balance(const string &address) override;
-  string transaction(int amount, const string &from_address,
-                                  const string &to_address) override;
+  string transaction( int amount,
+                      const string &from_address,
+                      const string &to_address) override;
 };
 
 MyServer::MyServer(AbstractServerConnector &connector,
@@ -62,8 +66,8 @@ int MyServer::balance(const string &address) {
 }
 
 string MyServer::transaction(int amount,
-                                      const string &from_address,
-                                      const string &to_address) {
+                            const string &from_address,
+                            const string &to_address) {
   cout << "SERVER | Received in transaction: from_address[" << from_address
             << "], to_address[" << to_address << "], amount[" << amount << "]"
             << endl;
