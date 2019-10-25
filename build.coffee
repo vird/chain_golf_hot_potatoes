@@ -2,17 +2,23 @@
 require 'fy'
 fs = require 'fs'
 {execSync} = require 'child_process'
-src_path = "src"
 argv = require('minimist')(process.argv.slice(2))
 
 # ###################################################################################################
 #    utils
 # ###################################################################################################
+file_loaded_hash = {}
 unpack_include = (code)->
   while reg_ret = /\#include \"([^\"]*)\"/.exec code
     [_skip, file] = reg_ret
-    puts "unfold #include \"#{file}\""
-    code = code.replace "#include \"#{file}\"", fs.readFileSync "#{src_path}/#{file}", 'utf-8'
+    if !file_loaded_hash[file]
+      file_loaded_hash[file] = true
+      puts "unfold #include \"#{file}\""
+      res = fs.readFileSync file, 'utf-8'
+    else
+      puts "SKIP #include \"#{file}\""
+      res = ""
+    code = code.replace "#include \"#{file}\"", res
   code
 
 strip_comments = (code)->
@@ -24,7 +30,13 @@ strip_empty_lines = (code)->
 
 strip_token_and_new_line = (code)->
   # dont squash with #define
+  # все-равно плохо работает с ;\n#define 
   code = code.replace /\s*([;{}\(\)])[\n\s]*(?!\#)/g, '$1'
+  # code = code.replace /\s*([;{}\(\)])[\n\s]*(.)/g, (_skip, body, suffix)->
+  #   if suffix == "#"
+  #     body + "\n#"
+  #   else
+  #     body + suffix
 
 strip_operator_space = (code)->
   code = code.replace /\s*([=,:]|<<)\s*/g, '$1'
@@ -68,10 +80,10 @@ str2tok = (str)->
           else
             default_fn()
       when '#'
-        if !reg_ret = /^\#(include|define).*/.exec str
+        if !reg_ret = /^\#(include|define|if|ifdef|ifndef|endif).*/.exec str
           default_fn()
           break
-        eat_regex 'include', /^\#(include|define).*/
+        eat_regex 'include', /^\#(include|define|if|ifdef|ifndef|endif).*/
         rst()
         
       when '"'
@@ -142,16 +154,17 @@ prop_print = ()->
   return
 # ###################################################################################################
 
-main = fs.readFileSync "#{src_path}/main.cpp", 'utf-8'
+process.chdir 'src'
+main = fs.readFileSync "main.cpp", 'utf-8'
 main = unpack_include main
+process.chdir '..'
 
 tok_list = str2tok main
-p tok_list
 unless argv.skip_pack
   tok_map tok_list, strip_comments
   tok_map tok_list, strip_empty_lines
-  tok_map tok_list, strip_token_and_new_line
   tok_map tok_list, strip_operator_space
+  tok_map tok_list, strip_token_and_new_line
 
 # ###################################################################################################
 #    TODO autopacker here
@@ -232,8 +245,9 @@ for k,v of replace_map
 #    auto propositions
 # ###################################################################################################
 
-tok_map tok_list, prop_fill
-prop_print()
+if argv.advice
+  tok_map tok_list, prop_fill
+  prop_print()
 # INJECT delayed, because wasting stats
 tok_list.unshift {
   type : 'raw'

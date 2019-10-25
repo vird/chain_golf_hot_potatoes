@@ -1,12 +1,20 @@
 #define u64 unsigned long long
+#define i64 long long
 #define u8 unsigned char
+#define F(i) r |= s[i]
 #include<cstdio>
 #include<filesystem>
 #include<iostream>
 #include<thread>
 #include<jsonrpccpp/server.h>
 #include<jsonrpccpp/server/connectors/httpserver.h>
-#include "keccak.c"
+#include<stdint.h>
+
+#include "ed25519.h"
+#include "fe.c"
+#include "ge.c"
+#include "sc.c"
+
 using namespace std;
 using namespace jsonrpc;
 using namespace Json;
