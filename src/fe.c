@@ -79,36 +79,36 @@ void fe_1(fe h) {
 */
 
 void fe_add(fe h, const fe f, const fe g) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t g0 = g[0];
-    int32_t g1 = g[1];
-    int32_t g2 = g[2];
-    int32_t g3 = g[3];
-    int32_t g4 = g[4];
-    int32_t g5 = g[5];
-    int32_t g6 = g[6];
-    int32_t g7 = g[7];
-    int32_t g8 = g[8];
-    int32_t g9 = g[9];
-    int32_t h0 = f0 + g0;
-    int32_t h1 = f1 + g1;
-    int32_t h2 = f2 + g2;
-    int32_t h3 = f3 + g3;
-    int32_t h4 = f4 + g4;
-    int32_t h5 = f5 + g5;
-    int32_t h6 = f6 + g6;
-    int32_t h7 = f7 + g7;
-    int32_t h8 = f8 + g8;
-    int32_t h9 = f9 + g9;
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 g0 = g[0];
+    i32 g1 = g[1];
+    i32 g2 = g[2];
+    i32 g3 = g[3];
+    i32 g4 = g[4];
+    i32 g5 = g[5];
+    i32 g6 = g[6];
+    i32 g7 = g[7];
+    i32 g8 = g[8];
+    i32 g9 = g[9];
+    i32 h0 = f0 + g0;
+    i32 h1 = f1 + g1;
+    i32 h2 = f2 + g2;
+    i32 h3 = f3 + g3;
+    i32 h4 = f4 + g4;
+    i32 h5 = f5 + g5;
+    i32 h6 = f6 + g6;
+    i32 h7 = f7 + g7;
+    i32 h8 = f8 + g8;
+    i32 h9 = f9 + g9;
     
     h[0] = h0;
     h[1] = h1;
@@ -131,39 +131,39 @@ void fe_add(fe h, const fe f, const fe g) {
     Preconditions: b in {0,1}.
 */
 
-void fe_cmov(fe f, const fe g, unsigned int b) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t g0 = g[0];
-    int32_t g1 = g[1];
-    int32_t g2 = g[2];
-    int32_t g3 = g[3];
-    int32_t g4 = g[4];
-    int32_t g5 = g[5];
-    int32_t g6 = g[6];
-    int32_t g7 = g[7];
-    int32_t g8 = g[8];
-    int32_t g9 = g[9];
-    int32_t x0 = f0 ^ g0;
-    int32_t x1 = f1 ^ g1;
-    int32_t x2 = f2 ^ g2;
-    int32_t x3 = f3 ^ g3;
-    int32_t x4 = f4 ^ g4;
-    int32_t x5 = f5 ^ g5;
-    int32_t x6 = f6 ^ g6;
-    int32_t x7 = f7 ^ g7;
-    int32_t x8 = f8 ^ g8;
-    int32_t x9 = f9 ^ g9;
+void fe_cmov(fe f, const fe g, u32 b) {
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 g0 = g[0];
+    i32 g1 = g[1];
+    i32 g2 = g[2];
+    i32 g3 = g[3];
+    i32 g4 = g[4];
+    i32 g5 = g[5];
+    i32 g6 = g[6];
+    i32 g7 = g[7];
+    i32 g8 = g[8];
+    i32 g9 = g[9];
+    i32 x0 = f0 ^ g0;
+    i32 x1 = f1 ^ g1;
+    i32 x2 = f2 ^ g2;
+    i32 x3 = f3 ^ g3;
+    i32 x4 = f4 ^ g4;
+    i32 x5 = f5 ^ g5;
+    i32 x6 = f6 ^ g6;
+    i32 x7 = f7 ^ g7;
+    i32 x8 = f8 ^ g8;
+    i32 x9 = f9 ^ g9;
 
-    b = (unsigned int) (- (int) b); /* silence warning */
+    b = (u32) (- (int) b); /* silence warning */
     x0 &= b;
     x1 &= b;
     x2 &= b;
@@ -194,38 +194,38 @@ void fe_cmov(fe f, const fe g, unsigned int b) {
     Preconditions: b in {0,1}.
 */
 
-void fe_cswap(fe f,fe g,unsigned int b) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t g0 = g[0];
-    int32_t g1 = g[1];
-    int32_t g2 = g[2];
-    int32_t g3 = g[3];
-    int32_t g4 = g[4];
-    int32_t g5 = g[5];
-    int32_t g6 = g[6];
-    int32_t g7 = g[7];
-    int32_t g8 = g[8];
-    int32_t g9 = g[9];
-    int32_t x0 = f0 ^ g0;
-    int32_t x1 = f1 ^ g1;
-    int32_t x2 = f2 ^ g2;
-    int32_t x3 = f3 ^ g3;
-    int32_t x4 = f4 ^ g4;
-    int32_t x5 = f5 ^ g5;
-    int32_t x6 = f6 ^ g6;
-    int32_t x7 = f7 ^ g7;
-    int32_t x8 = f8 ^ g8;
-    int32_t x9 = f9 ^ g9;
-    b = (unsigned int) (- (int) b); /* silence warning */
+void fe_cswap(fe f,fe g,u32 b) {
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 g0 = g[0];
+    i32 g1 = g[1];
+    i32 g2 = g[2];
+    i32 g3 = g[3];
+    i32 g4 = g[4];
+    i32 g5 = g[5];
+    i32 g6 = g[6];
+    i32 g7 = g[7];
+    i32 g8 = g[8];
+    i32 g9 = g[9];
+    i32 x0 = f0 ^ g0;
+    i32 x1 = f1 ^ g1;
+    i32 x2 = f2 ^ g2;
+    i32 x3 = f3 ^ g3;
+    i32 x4 = f4 ^ g4;
+    i32 x5 = f5 ^ g5;
+    i32 x6 = f6 ^ g6;
+    i32 x7 = f7 ^ g7;
+    i32 x8 = f8 ^ g8;
+    i32 x9 = f9 ^ g9;
+    b = (u32) (- (int) b); /* silence warning */
     x0 &= b;
     x1 &= b;
     x2 &= b;
@@ -265,16 +265,16 @@ void fe_cswap(fe f,fe g,unsigned int b) {
 */
 
 void fe_copy(fe h, const fe f) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
     
     h[0] = f0;
     h[1] = f1;
@@ -347,16 +347,16 @@ void fe_frombytes(fe h, const u8 *s) {
     h9 += carry8;
     h8 -= carry8 << 26;
 
-    h[0] = (int32_t) h0;
-    h[1] = (int32_t) h1;
-    h[2] = (int32_t) h2;
-    h[3] = (int32_t) h3;
-    h[4] = (int32_t) h4;
-    h[5] = (int32_t) h5;
-    h[6] = (int32_t) h6;
-    h[7] = (int32_t) h7;
-    h[8] = (int32_t) h8;
-    h[9] = (int32_t) h9;
+    h[0] = (i32) h0;
+    h[1] = (i32) h1;
+    h[2] = (i32) h2;
+    h[3] = (i32) h3;
+    h[4] = (i32) h4;
+    h[5] = (i32) h5;
+    h[6] = (i32) h6;
+    h[7] = (i32) h7;
+    h[8] = (i32) h8;
+    h[9] = (i32) h9;
 }
 
 
@@ -554,40 +554,40 @@ int fe_isnonzero(const fe f) {
 */
 
 void fe_mul(fe h, const fe f, const fe g) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t g0 = g[0];
-    int32_t g1 = g[1];
-    int32_t g2 = g[2];
-    int32_t g3 = g[3];
-    int32_t g4 = g[4];
-    int32_t g5 = g[5];
-    int32_t g6 = g[6];
-    int32_t g7 = g[7];
-    int32_t g8 = g[8];
-    int32_t g9 = g[9];
-    int32_t g1_19 = 19 * g1; /* 1.959375*2^29 */
-    int32_t g2_19 = 19 * g2; /* 1.959375*2^30; still ok */
-    int32_t g3_19 = 19 * g3;
-    int32_t g4_19 = 19 * g4;
-    int32_t g5_19 = 19 * g5;
-    int32_t g6_19 = 19 * g6;
-    int32_t g7_19 = 19 * g7;
-    int32_t g8_19 = 19 * g8;
-    int32_t g9_19 = 19 * g9;
-    int32_t f1_2 = 2 * f1;
-    int32_t f3_2 = 2 * f3;
-    int32_t f5_2 = 2 * f5;
-    int32_t f7_2 = 2 * f7;
-    int32_t f9_2 = 2 * f9;
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 g0 = g[0];
+    i32 g1 = g[1];
+    i32 g2 = g[2];
+    i32 g3 = g[3];
+    i32 g4 = g[4];
+    i32 g5 = g[5];
+    i32 g6 = g[6];
+    i32 g7 = g[7];
+    i32 g8 = g[8];
+    i32 g9 = g[9];
+    i32 g1_19 = 19 * g1; /* 1.959375*2^29 */
+    i32 g2_19 = 19 * g2; /* 1.959375*2^30; still ok */
+    i32 g3_19 = 19 * g3;
+    i32 g4_19 = 19 * g4;
+    i32 g5_19 = 19 * g5;
+    i32 g6_19 = 19 * g6;
+    i32 g7_19 = 19 * g7;
+    i32 g8_19 = 19 * g8;
+    i32 g9_19 = 19 * g9;
+    i32 f1_2 = 2 * f1;
+    i32 f3_2 = 2 * f3;
+    i32 f5_2 = 2 * f5;
+    i32 f7_2 = 2 * f7;
+    i32 f9_2 = 2 * f9;
     i64 f0g0    = f0   * (i64) g0;
     i64 f0g1    = f0   * (i64) g1;
     i64 f0g2    = f0   * (i64) g2;
@@ -752,16 +752,16 @@ void fe_mul(fe h, const fe f, const fe g) {
     h1 += carry0;
     h0 -= carry0 << 26;
 
-    h[0] = (int32_t) h0;
-    h[1] = (int32_t) h1;
-    h[2] = (int32_t) h2;
-    h[3] = (int32_t) h3;
-    h[4] = (int32_t) h4;
-    h[5] = (int32_t) h5;
-    h[6] = (int32_t) h6;
-    h[7] = (int32_t) h7;
-    h[8] = (int32_t) h8;
-    h[9] = (int32_t) h9;
+    h[0] = (i32) h0;
+    h[1] = (i32) h1;
+    h[2] = (i32) h2;
+    h[3] = (i32) h3;
+    h[4] = (i32) h4;
+    h[5] = (i32) h5;
+    h[6] = (i32) h6;
+    h[7] = (i32) h7;
+    h[8] = (i32) h8;
+    h[9] = (i32) h9;
 }
 
 
@@ -777,16 +777,16 @@ Postconditions:
 */
 
 void fe_mul121666(fe h, fe f) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
     i64 h0 = f0 * (i64) 121666;
     i64 h1 = f1 * (i64) 121666;
     i64 h2 = f2 * (i64) 121666;
@@ -820,16 +820,16 @@ void fe_mul121666(fe h, fe f) {
     carry6 = (h6 + (i64) (1<<25)) >> 26; h7 += carry6; h6 -= carry6 << 26;
     carry8 = (h8 + (i64) (1<<25)) >> 26; h9 += carry8; h8 -= carry8 << 26;
 
-    h[0] = (int32_t) h0;
-    h[1] = (int32_t) h1;
-    h[2] = (int32_t) h2;
-    h[3] = (int32_t) h3;
-    h[4] = (int32_t) h4;
-    h[5] = (int32_t) h5;
-    h[6] = (int32_t) h6;
-    h[7] = (int32_t) h7;
-    h[8] = (int32_t) h8;
-    h[9] = (int32_t) h9;
+    h[0] = (i32) h0;
+    h[1] = (i32) h1;
+    h[2] = (i32) h2;
+    h[3] = (i32) h3;
+    h[4] = (i32) h4;
+    h[5] = (i32) h5;
+    h[6] = (i32) h6;
+    h[7] = (i32) h7;
+    h[8] = (i32) h8;
+    h[9] = (i32) h9;
 }
 
 
@@ -844,26 +844,26 @@ Postconditions:
 */
 
 void fe_neg(fe h, const fe f) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t h0 = -f0;
-    int32_t h1 = -f1;
-    int32_t h2 = -f2;
-    int32_t h3 = -f3;
-    int32_t h4 = -f4;
-    int32_t h5 = -f5;
-    int32_t h6 = -f6;
-    int32_t h7 = -f7;
-    int32_t h8 = -f8;
-    int32_t h9 = -f9;
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 h0 = -f0;
+    i32 h1 = -f1;
+    i32 h2 = -f2;
+    i32 h3 = -f3;
+    i32 h4 = -f4;
+    i32 h5 = -f5;
+    i32 h6 = -f6;
+    i32 h7 = -f7;
+    i32 h8 = -f8;
+    i32 h9 = -f9;
 
     h[0] = h0;
     h[1] = h1;
@@ -980,29 +980,29 @@ See fe_mul.c for discussion of implementation strategy.
 */
 
 void fe_sq(fe h, const fe f) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t f0_2 = 2 * f0;
-    int32_t f1_2 = 2 * f1;
-    int32_t f2_2 = 2 * f2;
-    int32_t f3_2 = 2 * f3;
-    int32_t f4_2 = 2 * f4;
-    int32_t f5_2 = 2 * f5;
-    int32_t f6_2 = 2 * f6;
-    int32_t f7_2 = 2 * f7;
-    int32_t f5_38 = 38 * f5; /* 1.959375*2^30 */
-    int32_t f6_19 = 19 * f6; /* 1.959375*2^30 */
-    int32_t f7_38 = 38 * f7; /* 1.959375*2^30 */
-    int32_t f8_19 = 19 * f8; /* 1.959375*2^30 */
-    int32_t f9_38 = 38 * f9; /* 1.959375*2^30 */
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 f0_2 = 2 * f0;
+    i32 f1_2 = 2 * f1;
+    i32 f2_2 = 2 * f2;
+    i32 f3_2 = 2 * f3;
+    i32 f4_2 = 2 * f4;
+    i32 f5_2 = 2 * f5;
+    i32 f6_2 = 2 * f6;
+    i32 f7_2 = 2 * f7;
+    i32 f5_38 = 38 * f5; /* 1.959375*2^30 */
+    i32 f6_19 = 19 * f6; /* 1.959375*2^30 */
+    i32 f7_38 = 38 * f7; /* 1.959375*2^30 */
+    i32 f8_19 = 19 * f8; /* 1.959375*2^30 */
+    i32 f9_38 = 38 * f9; /* 1.959375*2^30 */
     i64 f0f0    = f0   * (i64) f0;
     i64 f0f1_2  = f0_2 * (i64) f1;
     i64 f0f2_2  = f0_2 * (i64) f2;
@@ -1114,16 +1114,16 @@ void fe_sq(fe h, const fe f) {
     carry0 = (h0 + (i64) (1 << 25)) >> 26;
     h1 += carry0;
     h0 -= carry0 << 26;
-    h[0] = (int32_t) h0;
-    h[1] = (int32_t) h1;
-    h[2] = (int32_t) h2;
-    h[3] = (int32_t) h3;
-    h[4] = (int32_t) h4;
-    h[5] = (int32_t) h5;
-    h[6] = (int32_t) h6;
-    h[7] = (int32_t) h7;
-    h[8] = (int32_t) h8;
-    h[9] = (int32_t) h9;
+    h[0] = (i32) h0;
+    h[1] = (i32) h1;
+    h[2] = (i32) h2;
+    h[3] = (i32) h3;
+    h[4] = (i32) h4;
+    h[5] = (i32) h5;
+    h[6] = (i32) h6;
+    h[7] = (i32) h7;
+    h[8] = (i32) h8;
+    h[9] = (i32) h9;
 }
 
 
@@ -1143,29 +1143,29 @@ See fe_mul.c for discussion of implementation strategy.
 */
 
 void fe_sq2(fe h, const fe f) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t f0_2 = 2 * f0;
-    int32_t f1_2 = 2 * f1;
-    int32_t f2_2 = 2 * f2;
-    int32_t f3_2 = 2 * f3;
-    int32_t f4_2 = 2 * f4;
-    int32_t f5_2 = 2 * f5;
-    int32_t f6_2 = 2 * f6;
-    int32_t f7_2 = 2 * f7;
-    int32_t f5_38 = 38 * f5; /* 1.959375*2^30 */
-    int32_t f6_19 = 19 * f6; /* 1.959375*2^30 */
-    int32_t f7_38 = 38 * f7; /* 1.959375*2^30 */
-    int32_t f8_19 = 19 * f8; /* 1.959375*2^30 */
-    int32_t f9_38 = 38 * f9; /* 1.959375*2^30 */
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 f0_2 = 2 * f0;
+    i32 f1_2 = 2 * f1;
+    i32 f2_2 = 2 * f2;
+    i32 f3_2 = 2 * f3;
+    i32 f4_2 = 2 * f4;
+    i32 f5_2 = 2 * f5;
+    i32 f6_2 = 2 * f6;
+    i32 f7_2 = 2 * f7;
+    i32 f5_38 = 38 * f5; /* 1.959375*2^30 */
+    i32 f6_19 = 19 * f6; /* 1.959375*2^30 */
+    i32 f7_38 = 38 * f7; /* 1.959375*2^30 */
+    i32 f8_19 = 19 * f8; /* 1.959375*2^30 */
+    i32 f9_38 = 38 * f9; /* 1.959375*2^30 */
     i64 f0f0    = f0   * (i64) f0;
     i64 f0f1_2  = f0_2 * (i64) f1;
     i64 f0f2_2  = f0_2 * (i64) f2;
@@ -1287,16 +1287,16 @@ void fe_sq2(fe h, const fe f) {
     carry0 = (h0 + (i64) (1 << 25)) >> 26;
     h1 += carry0;
     h0 -= carry0 << 26;
-    h[0] = (int32_t) h0;
-    h[1] = (int32_t) h1;
-    h[2] = (int32_t) h2;
-    h[3] = (int32_t) h3;
-    h[4] = (int32_t) h4;
-    h[5] = (int32_t) h5;
-    h[6] = (int32_t) h6;
-    h[7] = (int32_t) h7;
-    h[8] = (int32_t) h8;
-    h[9] = (int32_t) h9;
+    h[0] = (i32) h0;
+    h[1] = (i32) h1;
+    h[2] = (i32) h2;
+    h[3] = (i32) h3;
+    h[4] = (i32) h4;
+    h[5] = (i32) h5;
+    h[6] = (i32) h6;
+    h[7] = (i32) h7;
+    h[8] = (i32) h8;
+    h[9] = (i32) h9;
 }
 
 
@@ -1313,36 +1313,36 @@ Postconditions:
 */
 
 void fe_sub(fe h, const fe f, const fe g) {
-    int32_t f0 = f[0];
-    int32_t f1 = f[1];
-    int32_t f2 = f[2];
-    int32_t f3 = f[3];
-    int32_t f4 = f[4];
-    int32_t f5 = f[5];
-    int32_t f6 = f[6];
-    int32_t f7 = f[7];
-    int32_t f8 = f[8];
-    int32_t f9 = f[9];
-    int32_t g0 = g[0];
-    int32_t g1 = g[1];
-    int32_t g2 = g[2];
-    int32_t g3 = g[3];
-    int32_t g4 = g[4];
-    int32_t g5 = g[5];
-    int32_t g6 = g[6];
-    int32_t g7 = g[7];
-    int32_t g8 = g[8];
-    int32_t g9 = g[9];
-    int32_t h0 = f0 - g0;
-    int32_t h1 = f1 - g1;
-    int32_t h2 = f2 - g2;
-    int32_t h3 = f3 - g3;
-    int32_t h4 = f4 - g4;
-    int32_t h5 = f5 - g5;
-    int32_t h6 = f6 - g6;
-    int32_t h7 = f7 - g7;
-    int32_t h8 = f8 - g8;
-    int32_t h9 = f9 - g9;
+    i32 f0 = f[0];
+    i32 f1 = f[1];
+    i32 f2 = f[2];
+    i32 f3 = f[3];
+    i32 f4 = f[4];
+    i32 f5 = f[5];
+    i32 f6 = f[6];
+    i32 f7 = f[7];
+    i32 f8 = f[8];
+    i32 f9 = f[9];
+    i32 g0 = g[0];
+    i32 g1 = g[1];
+    i32 g2 = g[2];
+    i32 g3 = g[3];
+    i32 g4 = g[4];
+    i32 g5 = g[5];
+    i32 g6 = g[6];
+    i32 g7 = g[7];
+    i32 g8 = g[8];
+    i32 g9 = g[9];
+    i32 h0 = f0 - g0;
+    i32 h1 = f1 - g1;
+    i32 h2 = f2 - g2;
+    i32 h3 = f3 - g3;
+    i32 h4 = f4 - g4;
+    i32 h5 = f5 - g5;
+    i32 h6 = f6 - g6;
+    i32 h7 = f7 - g7;
+    i32 h8 = f8 - g8;
+    i32 h9 = f9 - g9;
 
     h[0] = h0;
     h[1] = h1;
@@ -1384,28 +1384,28 @@ Proof:
 */
 
 void fe_tobytes(u8 *s, const fe h) {
-    int32_t h0 = h[0];
-    int32_t h1 = h[1];
-    int32_t h2 = h[2];
-    int32_t h3 = h[3];
-    int32_t h4 = h[4];
-    int32_t h5 = h[5];
-    int32_t h6 = h[6];
-    int32_t h7 = h[7];
-    int32_t h8 = h[8];
-    int32_t h9 = h[9];
-    int32_t q;
-    int32_t carry0;
-    int32_t carry1;
-    int32_t carry2;
-    int32_t carry3;
-    int32_t carry4;
-    int32_t carry5;
-    int32_t carry6;
-    int32_t carry7;
-    int32_t carry8;
-    int32_t carry9;
-    q = (19 * h9 + (((int32_t) 1) << 24)) >> 25;
+    i32 h0 = h[0];
+    i32 h1 = h[1];
+    i32 h2 = h[2];
+    i32 h3 = h[3];
+    i32 h4 = h[4];
+    i32 h5 = h[5];
+    i32 h6 = h[6];
+    i32 h7 = h[7];
+    i32 h8 = h[8];
+    i32 h9 = h[9];
+    i32 q;
+    i32 carry0;
+    i32 carry1;
+    i32 carry2;
+    i32 carry3;
+    i32 carry4;
+    i32 carry5;
+    i32 carry6;
+    i32 carry7;
+    i32 carry8;
+    i32 carry9;
+    q = (19 * h9 + (((i32) 1) << 24)) >> 25;
     q = (h0 + q) >> 26;
     q = (h1 + q) >> 25;
     q = (h2 + q) >> 26;

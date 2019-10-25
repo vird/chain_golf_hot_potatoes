@@ -195,8 +195,10 @@ hard_replace = (k, v)->
   hard_replace_map[k] = true
 
 # type related
-# soft_replace "const", "C"
+soft_replace "const", "C"
 # soft_replace "string", "S"
+soft_replace "i64", "I"
+soft_replace "i32", "Q"
 # server related
 hard_replace "MyServer", "MS"
 hard_replace "TemplateServer", "TS"

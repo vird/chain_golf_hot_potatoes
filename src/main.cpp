@@ -1,5 +1,7 @@
 #define u64 unsigned long long
 #define i64 long long
+#define u32 unsigned int
+#define i32 int
 #define u8 unsigned char
 #define F(i) r |= s[i]
 #include<cstdio>

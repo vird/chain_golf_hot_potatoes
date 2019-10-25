@@ -3,7 +3,7 @@
 
 void ed25519_key_exchange(u8 *shared_secret, const u8 *public_key, const u8 *private_key) {
     u8 e[32];
-    unsigned int i;
+    u32 i;
     
     fe x1;
     fe x2;
@@ -14,8 +14,8 @@ void ed25519_key_exchange(u8 *shared_secret, const u8 *public_key, const u8 *pri
     fe tmp1;
 
     int pos;
-    unsigned int swap;
-    unsigned int b;
+    u32 swap;
+    u32 b;
 
     /* copy the private key and make sure it's valid */
     for (i = 0; i < 32; ++i) {
