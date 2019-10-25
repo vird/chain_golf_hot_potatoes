@@ -1,0 +1,23 @@
+{
+  "name": "chain_golf_hot_potatoes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vird/chain_golf_hot_potatoes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vird/chain_golf_hot_potatoes/issues"
+  },
+  "homepage": "https://github.com/vird/chain_golf_hot_potatoes#readme",
+  "dependencies": {
+    "fy": "github:hu2prod/fy"
+  }
+}
