@@ -484,6 +484,7 @@ int fe_isnonzero(const fe f) {
     fe_tobytes(s, f);
 
     r = s[0];
+    #define F(i) r |= s[i]
     F(1);
     F(2);
     F(3);
@@ -515,6 +516,7 @@ int fe_isnonzero(const fe f) {
     F(29);
     F(30);
     F(31);
+    #undef F
 
     return r != 0;
 }

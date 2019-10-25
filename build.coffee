@@ -3,7 +3,7 @@ require 'fy'
 fs = require 'fs'
 {execSync} = require 'child_process'
 argv = require('minimist')(process.argv.slice(2))
-
+argv.pack ?= true
 # ###################################################################################################
 #    utils
 # ###################################################################################################
@@ -21,6 +21,9 @@ unpack_include = (code)->
     code = code.replace "#include \"#{file}\"", res
   code
 
+compact_preprocessor = (code)->
+  code = code.replace /\\\n/g, ''
+
 strip_comments = (code)->
   code = code.replace /\/\*((?!\*\/)[\s\S])+\*\//g, ''
   code = code.replace /\n\s*\/\/.*/g, ''
@@ -29,14 +32,13 @@ strip_empty_lines = (code)->
   code = code.replace /\n{2,}/g, '\n'
 
 strip_token_and_new_line = (code)->
-  # dont squash with #define
-  # все-равно плохо работает с ;\n#define 
-  code = code.replace /\s*([;{}\(\)])[\n\s]*(?!\#)/g, '$1'
-  # code = code.replace /\s*([;{}\(\)])[\n\s]*(.)/g, (_skip, body, suffix)->
-  #   if suffix == "#"
-  #     body + "\n#"
-  #   else
-  #     body + suffix
+  # code = code.replace /\s*([;{}\(\)])[\n\s]*(?!\#)/g, '$1'
+  code = code.replace /\s*([;{}\(\)])[\n\s]*/g, '$1'
+
+# note #define is in another token, so you can't reach it with strip_token_and_new_line, so need fix after
+fix_semicolon_preproc = (code)->
+  code = code.replace /([;{}\(\)])\#/g, '$1\n#'
+  
 
 strip_operator_space = (code)->
   code = code.replace /\s*([-=,:*+^]|<<|>>)\s*/g, '$1'
@@ -157,10 +159,11 @@ prop_print = ()->
 process.chdir 'src'
 main = fs.readFileSync "main.cpp", 'utf-8'
 main = unpack_include main
+main = compact_preprocessor main
 process.chdir '..'
 
 tok_list = str2tok main
-unless argv.skip_pack
+if argv.pack
   tok_map tok_list, strip_comments
   tok_map tok_list, strip_empty_lines
   tok_map tok_list, strip_operator_space
@@ -235,7 +238,7 @@ hard_replace "address", "A"
 hard_replace "balance", "B"
 hard_replace "balanceI", "B"
 
-unless argv.skip_pack
+if argv.pack
   for k,v of replace_map
     tok_map tok_list, (str)->
       if /\s/.test k
@@ -263,6 +266,8 @@ tok_list.unshift {
 }
 
 main = tok2str tok_list
+if argv.pack
+  main = fix_semicolon_preproc main
 
 
 # TODO replace file name
