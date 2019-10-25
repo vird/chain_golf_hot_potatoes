@@ -85,11 +85,12 @@ string MyServer::transaction(int amount,
 }
 
 int main() {
-  HttpServer httpserver(10001);
-  MyServer s(httpserver, JSONRPC_SERVER_V1V2);
-  s.StartListening();
-  cout << "welcome to UTON HACK!" << endl;
-  this_thread::sleep_for(chrono::seconds(45));
-  s.StopListening();
+  // LOOKT_write_lookup_table_to_flash();
+  // HttpServer httpserver(10001);
+  // MyServer s(httpserver, JSONRPC_SERVER_V1V2);
+  // s.StartListening();
+  // cout << "welcome to UTON HACK!" << endl;
+  // this_thread::sleep_for(chrono::seconds(45));
+  // s.StopListening();
   return 0;
 }

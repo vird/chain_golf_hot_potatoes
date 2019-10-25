@@ -39,7 +39,7 @@ strip_token_and_new_line = (code)->
   #     body + suffix
 
 strip_operator_space = (code)->
-  code = code.replace /\s*([=,:]|<<)\s*/g, '$1'
+  code = code.replace /\s*([-=,:*+^]|<<|>>)\s*/g, '$1'
 
 str2tok = (str)->
   ret = []
@@ -197,6 +197,12 @@ hard_replace = (k, v)->
 # type related
 soft_replace "const", "C"
 # soft_replace "string", "S"
+###
+#define u64 unsigned long long
+#define i64 long long
+soft_replace "i64", "I"
+soft_replace "i32", "Q"
+###
 soft_replace "i64", "I"
 soft_replace "i32", "Q"
 # server related
