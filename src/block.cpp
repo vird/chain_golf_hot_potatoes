@@ -82,7 +82,8 @@ bool tx_validate(Tx &tx) {
   //acc_limit
   int L = gms.a2pk.size();
   
-  if (gms.balance[tx.send_addr] < tx.amount+tx_fee) return false;
+  // overflow protection
+  if (gms.balance[tx.send_addr] < max(tx.amount, tx.amount+tx_fee)) return false;
   if (tx.send_addr >= L) return false;
   if (tx.recv_addr >= L) return false;
   auto send_pub_key = gms.a2pk[tx.send_addr];
