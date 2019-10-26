@@ -34,8 +34,4 @@ cd boost_${BOOST_GENERATION}_${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}/ || e
 apt-get install -y libjsonrpccpp-dev libjsonrpccpp-tools
 
 # install other dependencies
-apt-get install clang
-
-apt-get install docker-engine
-
-apt-get install iproute2
+apt-get install clang docker-engine iproute2 -y
