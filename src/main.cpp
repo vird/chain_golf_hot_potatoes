@@ -84,7 +84,8 @@ class TemplateServer : public AbstractServer<TemplateServer> {
       printf("addr2 = %d\n", my_pub_key.b[0]);
       throw JsonRpcException(-2, "you don't own from_address");
     }
-    if (gms.balance[from_address] < amount + tx_fee) {
+    // overflow protection
+    if (gms.balance[from_address] < max(amount, amount + tx_fee)) {
       throw JsonRpcException(-3, "not enough balance");
     }
     
@@ -99,6 +100,8 @@ class TemplateServer : public AbstractServer<TemplateServer> {
     if (!tx_validate(tx)) {
       throw JsonRpcException(-9, "tx_verify fail");
     }
+    
+    printf("tx transfer %d coin %d -> %d\n", amount, from_address, to_address);
     
     gms.tx_list.push_back(tx);
     
