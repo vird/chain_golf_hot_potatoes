@@ -1,7 +1,13 @@
-typedef u8 t_hash[64];
-typedef u8 t_sign[64];
-typedef u8 t_pub_key[32];
-typedef u8 t_prv_key[64];
+#define T_ARR(name, size) \
+  struct name {\
+    u8 b[size];\
+  };\
+  bool operator!=(const name& a, const name& b){return memcmp(a.b, b.b, sizeof(a.b));}
+
+T_ARR(t_hash, 64)
+T_ARR(t_sign, 64)
+T_ARR(t_pub_key, 32)
+T_ARR(t_prv_key, 64)
 
 struct Block_header {
   u32       id;
