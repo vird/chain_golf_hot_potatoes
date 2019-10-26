@@ -17,6 +17,10 @@ It's better to start from Ubuntu 18.04.3
     cd chain_golf_hot_potatoes
     ./prepare-env.sh
 
+## How to build preprocessed source (main.cpp)
+
+    ./build.sh
+
 ## How to run
 
     ./run.sh
