@@ -11,6 +11,7 @@ Simple cryptocurrency with codegolf minimizer for hackathon.
 
 # How to install
 ## Dependencies
+It's better to start from Ubuntu 18.04.3
 
     git clone https://github.com/vird/chain_golf_hot_potatoes
     cd chain_golf_hot_potatoes
