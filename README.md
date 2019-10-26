@@ -36,7 +36,7 @@ It's better to start from Ubuntu 18.04.3
 
 ## How to preprocess + minify + build
 
-   ./build.coffee
+    ./build.coffee
 
 ## How to test in docker
 **under construction**
