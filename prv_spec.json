@@ -1,0 +1,96 @@
+[
+  {
+    "name": "balance",
+    "params": {
+      "address": "address"
+    },
+    "returns": 0
+  },
+  {
+    "name" : "transaction",
+    "params": {
+      "from_address": "address",
+      "to_address": "address",
+      "amount": 0
+    },
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "bc_height",
+    "params": {},
+    "returns": 0
+  },
+  {
+    "name" : "shutdown",
+    "params": {},
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "address_transfer",
+    "params": {
+      "address": "address",
+      "pub_key": "pub_key"
+    },
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "tx_push",
+    "params": {
+      "type"      : 0,
+      "amount"    : 0,
+      "send_addr" : "address",
+      "recv_addr" : "address",
+      "bind_pub_key" : "pub_key",
+      "tx_epoch"  : 0,
+      "nonce"     : 0,
+      "hash"      : "hash",
+      "sign"      : "sign"
+    },
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "get_node_list",
+    "params": {},
+    "returns": [
+      "ip_port_pair"
+    ]
+  },
+  {
+    "name" : "set_tx_mining_mode",
+    "params": {
+      "enabled": 1
+    },
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "get_address_pub_key",
+    "params": {
+      "address": "address"
+    },
+    "returns": "pub_key/fail"
+  },
+  {
+    "name" : "debug_set_key",
+    "params": {
+      "address": "address",
+      "pub_key": "pub_key",
+      "prv_key": "prv_key"
+    },
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "debug_key_gen",
+    "params": {},
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "debug_get_pub_key",
+    "params": {},
+    "returns": "pub_key"
+  },
+  {
+    "name" : "debug_get_prv_key",
+    "params": {},
+    "returns": "prv_key"
+  }
+]

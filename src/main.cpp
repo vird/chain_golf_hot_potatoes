@@ -9,6 +9,8 @@
 #include<thread>
 #include<jsonrpccpp/server.h>
 #include<jsonrpccpp/server/connectors/httpserver.h>
+#include<ifaddrs.h>
+#include<arpa/inet.h>
 #include<stdint.h>
 #include<algorithm>
 #include<vector>
@@ -34,7 +36,11 @@ using namespace Json;
 #include "net.cpp"
 
 void get_node_list(const Value &request, Value &response) {
-  response = 1;
+  for(auto it = gns.node_list.begin(), end = gns.node_list.end(); it != end; ++it) {
+    Value node;
+    node["ip_port_pair"] = *it;
+    response.append(node);
+  }
 }
 
 class LocalServer : public AbstractServer<LocalServer> {
@@ -65,7 +71,7 @@ class LocalServer : public AbstractServer<LocalServer> {
       &LocalServer::address_transferI);
     // networking
     bindAndAddMethod(Procedure(
-      "get_node_list", PARAMS_BY_NAME, JSON_INTEGER,
+      "get_node_list", PARAMS_BY_NAME, JSON_ARRAY,
         NULL),
       &LocalServer::get_node_listI);
     
@@ -268,14 +274,14 @@ class GlobalServer : public AbstractServer<GlobalServer> {
   GlobalServer(AbstractServerConnector &conn, serverVersion_t type = JSONRPC_SERVER_V2) : AbstractServer<GlobalServer>(conn, type) {
     // mirror prv
     bindAndAddMethod(Procedure(
-      "get_node_list", PARAMS_BY_NAME, JSON_INTEGER,
+      "get_node_list", PARAMS_BY_NAME, JSON_ARRAY,
         NULL),
       &GlobalServer::get_node_listI);
     // pub
     bindAndAddMethod(Procedure(
-      "handshake", PARAMS_BY_NAME, JSON_INTEGER,
-         "rev_ip_port", JSON_STRING,
-           NULL),
+      "handshake", PARAMS_BY_NAME, JSON_STRING,
+        "rev_ip_port", JSON_STRING,
+          NULL),
       &GlobalServer::handshakeI);
   }
   
@@ -295,7 +301,9 @@ class GlobalServer : public AbstractServer<GlobalServer> {
     // 53
     // we reserve up to
     if (rev_ip_port.size() > 100) {
-      throw JsonRpcException(-1, "bad rev_ip_port");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad rev_ip_port");
     }
     // TODO verify format better
     // TODO normalize
@@ -305,12 +313,49 @@ class GlobalServer : public AbstractServer<GlobalServer> {
       gns.node_list.push_back(rev_ip_port);
     }
     
-    response = 1;
+    response = "ok";
   }
 };
 
 
 int main() {
+  {
+    struct ifaddrs * ifAddrStruct=NULL;
+    struct ifaddrs * ifa=NULL;
+    void * tmpAddrPtr=NULL;
+    
+    getifaddrs(&ifAddrStruct);
+    
+    for (ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next) {
+        if (!ifa->ifa_addr) {
+            continue;
+        }
+        if (ifa->ifa_addr->sa_family == AF_INET) { // check it is IP4
+            // is a valid IP4 Address
+            tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
+            char addressBuffer[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
+            if (!strcmp(addressBuffer,"127.0.0.1")) continue;
+            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+            string addr_port = addressBuffer;
+            addr_port += ":";
+            addr_port += to_string(RPC_PUB_PORT);
+            gns.node_list.push_back(addr_port);
+        }/* else if (ifa->ifa_addr->sa_family == AF_INET6) { // check it is IP6
+            // is a valid IP6 Address
+            tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
+            char addressBuffer[INET6_ADDRSTRLEN];
+            inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
+            if (!strcmp(addressBuffer,"::1")) continue;
+            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+            string addr_port = addressBuffer;
+            addr_port += ":";
+            addr_port += to_string(RPC_PUB_PORT);
+            gns.node_list.push_back(addr_port);
+        }*/
+    }
+    if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
+  }
   LOOKT_write_lookup_table_to_flash();
   gms_init();
   

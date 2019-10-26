@@ -1,0 +1,145 @@
+[
+  {
+    "name" : "get_node_list",
+    "params": {},
+    "returns": [
+      {
+        "ip_port_pair" : "ip_port_pair"
+      }
+    ]
+  },
+  {
+    "name" : "handshake",
+    "params": {
+      "rev_ip_port" : "ip_port_pair"
+    },
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "bc_height",
+    "params": {},
+    "returns": 0
+  },
+  {
+    "name" : "get_block_number",
+    "params": {
+      "id": 1
+    },
+    "returns": {
+      "header" : {
+        "block header TBD" : "block header TBD"
+      },
+      "tx_list" : [
+        {
+          "type"      : 0,
+          "amount"    : 0,
+          "send_addr" : "address",
+          "recv_addr" : "address",
+          "bind_pub_key" : "pub_key",
+          "tx_epoch"  : 0,
+          "nonce"     : 0,
+          "hash"      : "hash",
+          "sign"      : "sign"
+        }
+      ],
+      "hash" : "hash",
+      "sign" : "sign"
+    }
+  },
+  {
+    "name" : "get_block_by_hash",
+    "params": {
+      "hash" : "hash"
+    },
+    "returns": {
+      "header" : {
+        "block header TBD" : "block header TBD"
+      },
+      "tx_list" : [
+        {
+          "type"      : 0,
+          "amount"    : 0,
+          "send_addr" : "address",
+          "recv_addr" : "address",
+          "bind_pub_key" : "pub_key",
+          "tx_epoch"  : 0,
+          "nonce"     : 0,
+          "hash"      : "hash",
+          "sign"      : "sign"
+        }
+      ],
+      "hash" : "hash",
+      "sign" : "sign"
+    }
+  },
+  {
+    "name" : "get_block_range",
+    "params": {
+      "from":1,
+      "to":100
+    },
+    "returns": [
+      {
+        "header" : {
+          "block header TBD" : "block header TBD"
+        },
+        "tx_list" : [
+          {
+            "type"      : 0,
+            "amount"    : 0,
+            "send_addr" : "address",
+            "recv_addr" : "address",
+            "bind_pub_key" : "pub_key",
+            "tx_epoch"  : 0,
+            "nonce"     : 0,
+            "hash"      : "hash",
+            "sign"      : "sign"
+          }
+        ],
+        "hash" : "hash",
+        "sign" : "sign"
+      }
+    ]
+  },
+  {
+    "name" : "block_push",
+    "params": {
+      "header": {
+        "header" : {
+          "block header TBD" : "block header TBD"
+        },
+        "tx_list" : [
+          {
+            "type"      : 0,
+            "amount"    : 0,
+            "send_addr" : "address",
+            "recv_addr" : "address",
+            "bind_pub_key" : "pub_key",
+            "tx_epoch"  : 0,
+            "nonce"     : 0,
+            "hash"      : "hash",
+            "sign"      : "sign"
+          }
+        ],
+        "hash" : "hash",
+        "sign" : "sign"
+      }
+    },
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "tx_push",
+    "params": {
+      "type"      : 0,
+      "amount"    : 0,
+      "send_addr" : "address",
+      "recv_addr" : "address",
+      "bind_pub_key" : "pub_key",
+      "tx_epoch"  : 0,
+      "nonce"     : 0,
+      "hash"      : "hash",
+      "sign"      : "sign"
+    },
+    "returns": "ok/fail"
+  }
+]

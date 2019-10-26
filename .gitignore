@@ -1,3 +1,7 @@
 node.out
 node_modules
 log
+pub_client.h
+pub_server.h
+prv_client.h
+prv_server.h
