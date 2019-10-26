@@ -139,7 +139,7 @@ void block_apply(Block &block) {
     tx_apply(*it);
   }
   // лёгкий способ быстро просуммировать все tx_fee
-  gms.balance[block.header.id] += mining_reward + tx_fee*block.tx_list.size();
+  gms.balance[block.header.issuer_addr] += mining_reward + tx_fee*block.tx_list.size();
   // issue 1 addr
   gms_account_new(block.header.issuer_pub_key);
 }
