@@ -38,6 +38,14 @@ It's better to start from Ubuntu 18.04.3
 
     ./build.coffee
 
+## How to preprocess + NO minify + build
+
+    ./build.coffee --pack=0
+
+## How to get minify advice
+
+    ./build.coffee --advice
+
 ## How to test in docker
 **under construction**
 
