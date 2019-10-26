@@ -35,6 +35,9 @@ using namespace Json;
 #include "db.cpp"
 #include "net.cpp"
 
+void bc_height(const Value &request, Value &response) {
+  response = (u64)gms.main_chain_block_list.size();
+}
 void get_node_list(const Value &request, Value &response) {
   for(auto it = gns.node_list.begin(), end = gns.node_list.end(); it != end; ++it) {
     Value node;
@@ -47,6 +50,17 @@ class LocalServer : public AbstractServer<LocalServer> {
  public:
   bool work = true;
   LocalServer(AbstractServerConnector &conn, serverVersion_t type = JSONRPC_SERVER_V2) : AbstractServer<LocalServer>(conn, type) {
+    // common
+    bindAndAddMethod(Procedure(
+      "bc_height", PARAMS_BY_NAME, JSON_INTEGER,
+        NULL),
+      &LocalServer::bc_heightI);
+    bindAndAddMethod(Procedure(
+      "get_node_list", PARAMS_BY_NAME, JSON_ARRAY,
+        NULL),
+      &LocalServer::get_node_listI);
+    
+    // prv only
     bindAndAddMethod(Procedure(
       "get_balance", PARAMS_BY_NAME, JSON_INTEGER,
          "address", JSON_INTEGER,
@@ -69,12 +83,6 @@ class LocalServer : public AbstractServer<LocalServer> {
         "pub_key", JSON_STRING,
         NULL),
       &LocalServer::address_transferI);
-    // networking
-    bindAndAddMethod(Procedure(
-      "get_node_list", PARAMS_BY_NAME, JSON_ARRAY,
-        NULL),
-      &LocalServer::get_node_listI);
-    
     // good for debug
     bindAndAddMethod(Procedure(
       "debug_set_key", PARAMS_BY_NAME, JSON_INTEGER,
@@ -87,6 +95,14 @@ class LocalServer : public AbstractServer<LocalServer> {
       "debug_key_gen", PARAMS_BY_NAME, JSON_INTEGER,
         NULL),
       &LocalServer::debug_key_genI);
+  }
+  
+  void bc_heightI(const Value &request, Value &response) {
+    bc_height(request, response);
+  }
+  
+  void get_node_listI(const Value &request, Value &response) {
+    get_node_list(request, response);
   }
   
   void balanceI(const Value &request, Value &response) {
@@ -262,27 +278,31 @@ class LocalServer : public AbstractServer<LocalServer> {
     
     response = 1;
   }
-  
-  void get_node_listI(const Value &request, Value &response) {
-    get_node_list(request, response);
-  }
 };
 
 class GlobalServer : public AbstractServer<GlobalServer> {
  public:
   bool work = true;
   GlobalServer(AbstractServerConnector &conn, serverVersion_t type = JSONRPC_SERVER_V2) : AbstractServer<GlobalServer>(conn, type) {
-    // mirror prv
+    // common
+    bindAndAddMethod(Procedure(
+      "bc_height", PARAMS_BY_NAME, JSON_INTEGER,
+        NULL),
+      &GlobalServer::bc_heightI);
     bindAndAddMethod(Procedure(
       "get_node_list", PARAMS_BY_NAME, JSON_ARRAY,
         NULL),
       &GlobalServer::get_node_listI);
-    // pub
+    // pub only
     bindAndAddMethod(Procedure(
       "handshake", PARAMS_BY_NAME, JSON_STRING,
         "rev_ip_port", JSON_STRING,
           NULL),
       &GlobalServer::handshakeI);
+  }
+  
+  void bc_heightI(const Value &request, Value &response) {
+    bc_height(request, response);
   }
   
   void get_node_listI(const Value &request, Value &response) {
