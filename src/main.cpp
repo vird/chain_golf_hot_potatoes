@@ -10,6 +10,7 @@
 #include<jsonrpccpp/server.h>
 #include<jsonrpccpp/server/connectors/httpserver.h>
 #include<stdint.h>
+#include<algorithm>
 #include<vector>
 #include<cstring>
 
@@ -30,33 +31,44 @@ using namespace Json;
 // blockchain stuff
 #include "block.cpp"
 #include "db.cpp"
+#include "net.cpp"
 
-class TemplateServer : public AbstractServer<TemplateServer> {
+void get_node_list(const Value &request, Value &response) {
+  response = 1;
+}
+
+class LocalServer : public AbstractServer<LocalServer> {
  public:
   bool work = true;
-  TemplateServer(AbstractServerConnector &conn, serverVersion_t type = JSONRPC_SERVER_V2) : AbstractServer<TemplateServer>(conn, type) {
+  LocalServer(AbstractServerConnector &conn, serverVersion_t type = JSONRPC_SERVER_V2) : AbstractServer<LocalServer>(conn, type) {
     bindAndAddMethod(Procedure(
       "get_balance", PARAMS_BY_NAME, JSON_INTEGER,
          "address", JSON_INTEGER,
            NULL),
-      &TemplateServer::balanceI);
+      &LocalServer::balanceI);
     bindAndAddMethod(Procedure(
       "shutdown", PARAMS_BY_NAME, JSON_INTEGER,
            NULL),
-      &TemplateServer::shutdownI);
+      &LocalServer::shutdownI);
     bindAndAddMethod(Procedure(
-      "transfer", PARAMS_BY_NAME, JSON_INTEGER,
+      "transfer", PARAMS_BY_NAME, JSON_STRING,
         "amount", JSON_INTEGER,
         "from_address", JSON_INTEGER,
         "to_address", JSON_INTEGER,
         NULL),
-      &TemplateServer::transferI);
+      &LocalServer::transferI);
     bindAndAddMethod(Procedure(
       "address_transfer", PARAMS_BY_NAME, JSON_INTEGER,
         "address", JSON_INTEGER,
         "pub_key", JSON_STRING,
         NULL),
-      &TemplateServer::address_transferI);
+      &LocalServer::address_transferI);
+    // networking
+    bindAndAddMethod(Procedure(
+      "get_node_list", PARAMS_BY_NAME, JSON_INTEGER,
+        NULL),
+      &LocalServer::get_node_listI);
+    
     // good for debug
     bindAndAddMethod(Procedure(
       "debug_set_key", PARAMS_BY_NAME, JSON_INTEGER,
@@ -64,11 +76,11 @@ class TemplateServer : public AbstractServer<TemplateServer> {
         "pub_key", JSON_STRING,
         "prv_key", JSON_STRING,
         NULL),
-      &TemplateServer::debug_set_keyI);
+      &LocalServer::debug_set_keyI);
     bindAndAddMethod(Procedure(
       "debug_key_gen", PARAMS_BY_NAME, JSON_INTEGER,
         NULL),
-      &TemplateServer::debug_key_genI);
+      &LocalServer::debug_key_genI);
   }
   
   void balanceI(const Value &request, Value &response) {
@@ -76,7 +88,9 @@ class TemplateServer : public AbstractServer<TemplateServer> {
     // u32 address = atoi(addr);
     u32 address = request["address"].asInt();
     if (address >= gms.balance.size()) {
-      throw JsonRpcException(-1, "Address not exists");
+      response = 0;
+      return;
+      // throw JsonRpcException(-1, "Address not exists");
     }
     response = gms.balance[address];
   }
@@ -92,18 +106,26 @@ class TemplateServer : public AbstractServer<TemplateServer> {
     
     u32 from_address = request["from_address"].asInt();
     if (from_address >= gms.balance.size()) {
-      throw JsonRpcException(-1, "from_address not exists");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "from_address not exists");
     }
     u32 to_address = request["to_address"].asInt();
     if (to_address >= gms.balance.size()) {
-      throw JsonRpcException(-1, "to_address not exists");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "to_address not exists");
     }
     if (gms.a2pk[from_address] != my_pub_key) {
-      throw JsonRpcException(-2, "you don't own from_address");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-2, "you don't own from_address");
     }
     // overflow protection
     if (gms.balance[from_address] < max(amount, amount + tx_fee)) {
-      throw JsonRpcException(-3, "not enough balance");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-3, "not enough balance");
     }
     
     Tx tx;
@@ -116,14 +138,16 @@ class TemplateServer : public AbstractServer<TemplateServer> {
     
     if (!tx_validate(tx)) {
       printf("tx_validate_reason = %d\n", tx_validate_reason);
-      throw JsonRpcException(-9, "tx_validate fail");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-9, "tx_validate fail");
     }
     
     printf("tx transfer %d coin %d -> %d\n", amount, from_address, to_address);
     
     gms.tx_list.push_back(tx);
     
-    response = 1;
+    response = "ok";
   }
   
   void address_transferI(const Value &request, Value &response) {
@@ -232,7 +256,59 @@ class TemplateServer : public AbstractServer<TemplateServer> {
     
     response = 1;
   }
+  
+  void get_node_listI(const Value &request, Value &response) {
+    get_node_list(request, response);
+  }
 };
+
+class GlobalServer : public AbstractServer<GlobalServer> {
+ public:
+  bool work = true;
+  GlobalServer(AbstractServerConnector &conn, serverVersion_t type = JSONRPC_SERVER_V2) : AbstractServer<GlobalServer>(conn, type) {
+    // mirror prv
+    bindAndAddMethod(Procedure(
+      "get_node_list", PARAMS_BY_NAME, JSON_INTEGER,
+        NULL),
+      &GlobalServer::get_node_listI);
+    // pub
+    bindAndAddMethod(Procedure(
+      "handshake", PARAMS_BY_NAME, JSON_INTEGER,
+         "rev_ip_port", JSON_STRING,
+           NULL),
+      &GlobalServer::handshakeI);
+  }
+  
+  void get_node_listI(const Value &request, Value &response) {
+    get_node_list(request, response);
+  }
+  
+  // NOTE can exhaust memory.
+  // LATER add protection
+  void handshakeI(const Value &request, Value &response) {
+    string rev_ip_port = request["rev_ip_port"].asString();
+    // https://stackoverflow.com/questions/1076714/max-length-for-client-ip-address/1076749
+    // ipv6 = 45
+    // https://stackoverflow.com/questions/186829/how-do-ports-work-with-ipv6
+    // + [] 2
+    // + port 6
+    // 53
+    // we reserve up to
+    if (rev_ip_port.size() > 100) {
+      throw JsonRpcException(-1, "bad rev_ip_port");
+    }
+    // TODO verify format better
+    // TODO normalize
+    auto end = gns.node_list.end();
+    auto it = find(gns.node_list.begin(), end, rev_ip_port);
+    if (it == end) {
+      gns.node_list.push_back(rev_ip_port);
+    }
+    
+    response = 1;
+  }
+};
+
 
 int main() {
   LOOKT_write_lookup_table_to_flash();
@@ -308,14 +384,20 @@ int main() {
   //     printf("\n");
   //   }
   // }
-  HttpServer httpserver(10001);
-  TemplateServer s(httpserver, JSONRPC_SERVER_V1V2);
-  s.StartListening();
+  HttpServer hs1(RPC_PRV_PORT);
+  LocalServer s1(hs1, JSONRPC_SERVER_V1V2);
+  HttpServer hs2(RPC_PUB_PORT);
+  GlobalServer s2(hs2, JSONRPC_SERVER_V1V2);
+  s1.StartListening();
+  s2.StartListening();
+  printf("pub server port %d\n", RPC_PUB_PORT);
+  printf("prv server port %d\n", RPC_PRV_PORT);
   cout << "welcome to UTON HACK!" << endl;
-  while(s.work){
+  while(s1.work) {
     block_emit();
     this_thread::sleep_for(chrono::milliseconds(10));
   }
-  s.StopListening();
+  s1.StopListening();
+  s2.StopListening();
   return 0;
 }
