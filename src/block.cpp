@@ -3,7 +3,7 @@
 
 u64 hash2weight(t_hash &hash) {
   u64 res = 0;
-  for(int i=0;i<hash_byte_count;i++) {
+  for(int i=0;i<t_hash_size;i++) {
     u32 loc = __builtin_clz(hash.b[i]);
     res += loc;
     if (loc != 32) break;
@@ -57,16 +57,17 @@ bool block_header_validate(Block_header &header) {
     sizeof(u32)+                                                        \
     sizeof(u32)+                                                        \
     sizeof(u32)+                                                        \
-    sizeof(i32)+                                                        \
+    sizeof(u32)+                                                        \
     sizeof(u32)                                                         \
   );                                                                    \
   u8 buffer[len];                                                       \
   u8 *buf_ptr = (u8*)&buffer;                                           \
   u32 s = 0;                                                            \
+  memcpy(buf_ptr, &tx.type      , s=sizeof(u32));buf_ptr+=s;            \
   memcpy(buf_ptr, &tx.amount    , s=sizeof(u32));buf_ptr+=s;            \
   memcpy(buf_ptr, &tx.send_addr , s=sizeof(u32));buf_ptr+=s;            \
   memcpy(buf_ptr, &tx.recv_addr , s=sizeof(u32));buf_ptr+=s;            \
-  memcpy(buf_ptr, &tx.bind_addr , s=sizeof(i32));buf_ptr+=s;            \
+  memcpy(buf_ptr, &tx.bind_pub_key.b, s=sizeof(t_pub_key_size));buf_ptr+=s;            \
   memcpy(buf_ptr, &tx.nonce     , s=sizeof(u32));/*buf_ptr+=s;*/        \
   sha512_context ctx;                                                   \
   sha512_init(&ctx);                                                    \
@@ -78,31 +79,46 @@ void tx_sign(Tx &tx, t_pub_key &pub_key, t_prv_key &prv_key) {
   ed25519_sign(tx.sign.b, (u8*)&buffer, len, pub_key.b, prv_key.b);
 }
 
+int tx_validate_reason = 0;
+#define RET(x) {tx_validate_reason=x;return false;}
 bool tx_validate(Tx &tx) {
   //acc_limit
   int L = gms.a2pk.size();
-  
-  // overflow protection
-  if (gms.balance[tx.send_addr] < max(tx.amount, tx.amount+tx_fee)) return false;
-  if (tx.send_addr >= L) return false;
-  if (tx.recv_addr >= L) return false;
+  if (tx.send_addr >= L) RET(1)
+  if (tx.recv_addr >= L) RET(2)
   auto send_pub_key = gms.a2pk[tx.send_addr];
-  if (tx.bind_addr != -1) {
-    if (send_pub_key != gms.a2pk[tx.send_addr]) return false;
+  
+  switch(tx.type) {
+    case 1: // transfer
+      // overflow protection
+      if (gms.balance[tx.send_addr] < max(tx.amount, tx.amount + tx_fee)) RET(3)
+      break;
+    case 2: // address_transfer
+      if (tx.recv_addr >= L) RET(4)
+      if (send_pub_key != gms.a2pk[tx.recv_addr]) RET(5)
+      break;
+    default:
+      RET(6)
   }
+  
   SL2
   t_hash cmp_hash;
   sha512_final(&ctx, (u8*)&cmp_hash);
-  if (cmp_hash != tx.hash) return false;
-  return ed25519_verify(tx.sign.b, (u8*)&buffer, len, send_pub_key.b);
+  if (cmp_hash != tx.hash) RET(7)
+  if (!ed25519_verify(tx.sign.b, (u8*)&buffer, len, send_pub_key.b)) RET(8)
+  return true;
 }
 
 void tx_apply(Tx &tx) {
-  gms.balance[tx.send_addr] -= tx.amount+tx_fee;
-  gms.balance[tx.recv_addr] += tx.amount;
-  
-  if (tx.bind_addr != -1) {
-    gms.a2pk[tx.bind_addr] = gms.a2pk[tx.recv_addr];
+  switch(tx.type) {
+    case 1: // transfer
+      gms.balance[tx.send_addr] -= tx.amount+tx_fee;
+      gms.balance[tx.recv_addr] += tx.amount;
+      break;
+    
+    case 2: // address_transfer
+      gms.a2pk[tx.recv_addr] = tx.bind_pub_key;
+      break;
   }
 }
 
