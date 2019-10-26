@@ -54,16 +54,16 @@ bool block_header_validate(Block_header &header) {
 }
 
 void block_header_to_json(Block_header &header, Value &value) {
-  value["id"]           = header.id              ;
-  value["version"]      = header.version         ;
-  // header.prev_hash       ;
-  // header.merkle_tree     ;
-  value["issuer_addr"]  = header.issuer_addr         ;
-  // header.issuer_pub_key.b;
-  value["nonce"]        = header.nonce         ;
-  // header.hash
-  // header.sign
-  value["weight"]       = header.weight         ;
+  value["id"]             = header.id                           ;
+  value["version"]        = header.version                      ;
+  value["prev_hash"]      = t_hash2str(header.prev_hash)        ;
+  value["merkle_tree"]    = t_hash2str(header.merkle_tree)      ;
+  value["issuer_addr"]    = header.issuer_addr                  ;
+  value["issuer_pub_key"] = t_pub_key2str(header.issuer_pub_key);
+  value["nonce"]          = header.nonce                        ;
+  value["hash"]           = t_hash2str(header.hash)             ;
+  value["sign"]           = t_sign2str(header.sign)             ;
+  value["weight"]         = header.weight                       ;
 }
 
 // SIGN_LEN
@@ -140,9 +140,9 @@ void tx_apply(Tx &tx) {
 void tx_to_json(Tx &tx, Value &value) {
   value["type"]     = tx.type      ;
   value["amount"]   = tx.amount    ;
-  // value["send_addr"]= tx.send_addr ;
-  // value["recv_addr"]= tx.recv_addr ;
-  // tx.bind_pub_key.b
+  value["send_addr"]= tx.send_addr ;
+  value["recv_addr"]= tx.recv_addr ;
+  value["bind_pub_key"]= t_pub_key2str(tx.bind_pub_key);
   value["nonce"]    = tx.nonce     ;
 }
 

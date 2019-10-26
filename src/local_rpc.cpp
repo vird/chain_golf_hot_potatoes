@@ -219,8 +219,8 @@ class LocalServer : public AbstractServer<LocalServer> {
     str2t_prv_key(hex_prv_key, prv_key);
     
     if (gms.a2pk[address] != pub_key) {
-      pub_key_print("pub_key           = ", pub_key);
-      pub_key_print("gms.a2pk[address] = ", gms.a2pk[address]);
+      t_pub_key_print("pub_key           = ", pub_key);
+      t_pub_key_print("gms.a2pk[address] = ", gms.a2pk[address]);
       response = "fail";
       return;
       // throw JsonRpcException(-2, "address and pub_key mismatch");
@@ -229,8 +229,8 @@ class LocalServer : public AbstractServer<LocalServer> {
     my_primary_address = address;
     my_pub_key = pub_key;
     my_prv_key = prv_key;
-    pub_key_print("my_pub_key           = ", my_pub_key);
-    prv_key_print("my_prv_key           = ", my_prv_key);
+    t_pub_key_print("my_pub_key           = ", my_pub_key);
+    t_prv_key_print("my_prv_key           = ", my_prv_key);
     
     response = "ok";
   }
@@ -246,8 +246,8 @@ class LocalServer : public AbstractServer<LocalServer> {
     t_prv_key prv_key;
     ed25519_create_keypair(pub_key.b, prv_key.b, seed);
     
-    pub_key_print("pub_key = ", pub_key);
-    prv_key_print("prv_key = ", prv_key);
+    t_pub_key_print("pub_key = ", pub_key);
+    t_prv_key_print("prv_key = ", prv_key);
     
     response = "ok";
   }
