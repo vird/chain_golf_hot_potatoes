@@ -22,11 +22,11 @@ t_prv_key my_prv_key;
 
 
 t_pub_key genesis_pub_key;
-t_prv_key genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUT_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU;
+t_prv_key genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUR_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU;
 
 void gms_init() {
   unsigned char seed[32] = {0xFC};
-  ed25519_create_keypair(genesis_pub_key.b, genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUT_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU.b, seed);
+  ed25519_create_keypair(genesis_pub_key.b, genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUR_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU.b, seed);
   
   gms_account_new(genesis_pub_key);
   gms.balance[0] = 1e6;
@@ -37,7 +37,7 @@ void gms_init() {
   block.header.issuer_addr = 0;
   block.header.issuer_pub_key = genesis_pub_key;
   block.header.nonce = 0;
-  block_sign(block, genesis_pub_key, genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUT_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU);
+  block_sign(block, genesis_pub_key, genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUR_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU);
   block_weight_calc(block);
   if (!block_validate(block)) {
     throw new Exception("block validation failed for our own block");

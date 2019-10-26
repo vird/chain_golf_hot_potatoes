@@ -12,7 +12,7 @@ apt-get update -y
 apt-get dist-upgrade -y
 
 # install development dependencies
-apt-get install -y gcc-9 g++-9 make libicu-dev libbz2-dev wget libssl-dev libcurl4 libcurl4-openssl-dev
+apt-get install -y gcc-9 g++-9 make libicu-dev libbz2-dev wget libssl-dev libcurl4 libcurl4-openssl-dev clang docker.io iproute2 libjsonrpccpp-dev libjsonrpccpp-tools
 
 BOOST_GENERATION=1
 BOOST_MAJOR_VERSION=71
@@ -31,7 +31,5 @@ cd boost_${BOOST_GENERATION}_${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}/ || e
 
 ./b2 install
 
-apt-get install -y libjsonrpccpp-dev libjsonrpccpp-tools
-
-# install other dependencies
-apt-get install clang docker-engine iproute2 -y
+# clean garbage
+rm -rf boost_${BOOST_GENERATION}_${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}*

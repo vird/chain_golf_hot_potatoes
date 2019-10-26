@@ -89,7 +89,7 @@ int main() {
   // }
   // ed25519_create_keypair(my_pub_key.b, my_prv_key.b, seed);
   my_pub_key = genesis_pub_key;
-  my_prv_key = genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUT_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU;
+  my_prv_key = genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUR_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU;
   
   gms_init();
   
