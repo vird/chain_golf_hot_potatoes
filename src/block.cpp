@@ -1,6 +1,16 @@
 #include "block.hpp"
 #include "db.hpp"
 
+u64 hash2weight(t_hash &hash) {
+  u64 res = 0;
+  for(int i=0;i<hash_byte_count;i++) {
+    u32 loc = __builtin_clz(hash.b[i]);
+    res += loc;
+    if (loc != 32) break;
+  }
+  return res;
+}
+
 // SIGN_LEN
 #define SL1 \
   const int len = (                                                                         \
@@ -47,7 +57,8 @@ bool block_header_validate(Block_header &header) {
     sizeof(u32)+                                                        \
     sizeof(u32)+                                                        \
     sizeof(u32)+                                                        \
-    sizeof(i32)                                                         \
+    sizeof(i32)+                                                        \
+    sizeof(u32)                                                         \
   );                                                                    \
   u8 buffer[len];                                                       \
   u8 *buf_ptr = (u8*)&buffer;                                           \
@@ -55,7 +66,17 @@ bool block_header_validate(Block_header &header) {
   memcpy(buf_ptr, &tx.amount    , s=sizeof(u32));buf_ptr+=s;            \
   memcpy(buf_ptr, &tx.send_addr , s=sizeof(u32));buf_ptr+=s;            \
   memcpy(buf_ptr, &tx.recv_addr , s=sizeof(u32));buf_ptr+=s;            \
-  memcpy(buf_ptr, &tx.bind_addr , s=sizeof(i32));/*buf_ptr+=s;*/        \
+  memcpy(buf_ptr, &tx.bind_addr , s=sizeof(i32));buf_ptr+=s;            \
+  memcpy(buf_ptr, &tx.nonce     , s=sizeof(u32));/*buf_ptr+=s;*/        \
+  sha512_context ctx;                                                   \
+  sha512_init(&ctx);                                                    \
+  sha512_update(&ctx, (u8*)&buffer, len);                               \
+
+void tx_sign(Tx &tx, t_pub_key &pub_key, t_prv_key &prv_key) {
+  SL2
+  sha512_final(&ctx, (u8*)&tx.hash);
+  ed25519_sign(tx.sign.b, (u8*)&buffer, len, pub_key.b, prv_key.b);
+}
 
 bool tx_validate(Tx &tx) {
   //acc_limit
@@ -69,12 +90,10 @@ bool tx_validate(Tx &tx) {
     if (send_pub_key != gms.a2pk[tx.send_addr]) return false;
   }
   SL2
+  t_hash cmp_hash;
+  sha512_final(&ctx, (u8*)&cmp_hash);
+  if (cmp_hash != tx.hash) return false;
   return ed25519_verify(tx.sign.b, (u8*)&buffer, len, send_pub_key.b);
-}
-
-void tx_sign(Tx &tx, t_pub_key &pub_key, t_prv_key &prv_key) {
-  SL2
-  ed25519_sign(tx.sign.b, (u8*)&buffer, len, pub_key.b, prv_key.b);
 }
 
 void tx_apply(Tx &tx) {
@@ -122,6 +141,14 @@ void block_apply(Block &block) {
   // лёгкий способ быстро просуммировать все tx_fee
   gms.balance[block.header.id] += mining_reward + tx_fee*block.tx_list.size();
   // issue 1 addr
-  gms.a2pk.push_back(block.header.issuer_pub_key);
-  gms.balance.push_back(0);
+  gms_account_new(block.header.issuer_pub_key);
+}
+
+void block_weight_calc(Block &block) {
+  u32 weight = 0;
+  for(auto it = block.tx_list.begin(), end = block.tx_list.end(); it != end; ++it) {
+    weight += it->weight = hash2weight(it->hash);
+  }
+  weight += block.header.weight = hash2weight(block.header.hash);
+  block.weight = weight;
 }

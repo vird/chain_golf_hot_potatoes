@@ -80,6 +80,8 @@ MyServer::MyServer(AbstractServerConnector &connector,
     : TemplateServer(connector, type) {}
 
 int MyServer::balance(const string &address) {
+  u32 addr_num = atoi(address.c_str());
+  if (addr_num >= gms.balance.size()) return 0;
   cout << "SERVER | Received in balance: address[" << address << "]"
             << endl;
   return 1;
