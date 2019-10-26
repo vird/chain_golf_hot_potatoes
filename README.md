@@ -12,6 +12,8 @@ Simple cryptocurrency with codegolf minimizer for hackathon.
 # How to install
 ## Dependencies
 
+    git clone https://github.com/vird/chain_golf_hot_potatoes
+    cd chain_golf_hot_potatoes
     ./prepare-env.sh
 
 ## How to run
