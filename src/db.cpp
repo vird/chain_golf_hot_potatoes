@@ -16,7 +16,7 @@ void block_unpack(Block &block) {
 
 
 // mem state
-u32 my_primary_address = 0;
+u32 my_primary_address;
 t_pub_key my_pub_key;
 t_prv_key my_prv_key;
 
@@ -53,6 +53,8 @@ void block_emit() {
   block.header.issuer_addr = my_primary_address;
   block.header.issuer_pub_key = my_pub_key;
   block.header.nonce = 0;
+  block.tx_list = gms.tx_list;
+  gms.tx_list.clear();
   block_sign(block, my_pub_key, my_prv_key);
   block_weight_calc(block);
   gms.main_chain_block_list.push_back(block);

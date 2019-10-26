@@ -17,6 +17,8 @@ struct MemState {
   // TODO Block hash -> map
   u32 main_chain_block_offset = 0;
   vector<Block> main_chain_block_list;
+  // tx pool
+  vector<Tx> tx_list;
   
   // address_to_pub_key
   vector<t_pub_key> a2pk;

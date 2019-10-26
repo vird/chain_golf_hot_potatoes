@@ -12,7 +12,7 @@ apt-get update -y
 apt-get dist-upgrade -y
 
 # install development dependencies
-apt-get install -y gcc-9 g++-9 make libicu-dev libbz2-dev wget libssl-dev libcurl4 libcurl4-openssl-dev clang docker.io iproute2 libjsonrpccpp-dev libjsonrpccpp-tools
+apt-get install -y g++ gcc-9 g++-9 make libicu-dev libbz2-dev wget libssl-dev libcurl4 libcurl4-openssl-dev clang docker.io iproute2 libjsonrpccpp-dev libjsonrpccpp-tools
 
 BOOST_GENERATION=1
 BOOST_MAJOR_VERSION=71

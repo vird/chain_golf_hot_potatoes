@@ -31,31 +31,29 @@ using namespace Json;
 #include "block.cpp"
 #include "db.cpp"
 
-
 class TemplateServer : public AbstractServer<TemplateServer> {
  public:
   bool work = true;
-  TemplateServer(AbstractServerConnector &conn,
-                 serverVersion_t type = JSONRPC_SERVER_V2)
-      : AbstractServer<TemplateServer>(conn, type) {
-    bindAndAddMethod(
-        Procedure(
-          "get_balance", PARAMS_BY_NAME, JSON_INTEGER, 
-             "address", JSON_INTEGER,
-               NULL),
-        &TemplateServer::balanceI);
-    bindAndAddMethod(
-        Procedure(
-          "transaction", PARAMS_BY_NAME, JSON_STRING,
-            "amount", JSON_INTEGER, 
-            "from_address", JSON_STRING,
-            "to_address", JSON_STRING,
-            NULL),
-        &TemplateServer::transactionI);
+  TemplateServer(AbstractServerConnector &conn, serverVersion_t type = JSONRPC_SERVER_V2) : AbstractServer<TemplateServer>(conn, type) {
+    bindAndAddMethod(Procedure(
+      "get_balance", PARAMS_BY_NAME, JSON_INTEGER,
+         "address", JSON_INTEGER,
+           NULL),
+      &TemplateServer::balanceI);
+    bindAndAddMethod(Procedure(
+      "shutdown", PARAMS_BY_NAME, JSON_INTEGER,
+           NULL),
+      &TemplateServer::shutdownI);
+    bindAndAddMethod(Procedure(
+      "transfer", PARAMS_BY_NAME, JSON_INTEGER,
+        "amount", JSON_INTEGER,
+        "from_address", JSON_INTEGER,
+        "to_address", JSON_INTEGER,
+        NULL),
+      &TemplateServer::transferI);
   }
 
-  void balanceI(const Value &request,
-                               Value &response) {
+  void balanceI(const Value &request, Value &response) {
     // const char* addr = request["address"].asString().c_str();
     // u32 addr_num = atoi(addr);
     u32 addr_num = request["address"].asInt();
@@ -64,11 +62,47 @@ class TemplateServer : public AbstractServer<TemplateServer> {
     }
     response = gms.balance[addr_num];
   }
-  void transactionI(const Value &request,
-                            Value &response) {
-    response = transaction( request["amount"].asInt(),
-                            request["from_address"].asString(),
-                            request["to_address"].asString());
+
+  void shutdownI(const Value &request, Value &response) {
+    printf("shutdown scheduled\n");
+    work = false;
+    response = 1;
+  }
+  void transferI(const Value &request, Value &response) {
+    u32 amount = request["amount"].asInt();
+    
+    u32 from_address = request["from_address"].asInt();
+    if (from_address >= gms.balance.size()) {
+      throw JsonRpcException(-1, "from_address not exists");
+    }
+    u32 to_address = request["to_address"].asInt();
+    if (to_address >= gms.balance.size()) {
+      throw JsonRpcException(-1, "to_address not exists");
+    }
+    if (gms.a2pk[from_address] != my_pub_key) {
+      printf("addr1 = %d\n", gms.a2pk[from_address].b[0]);
+      printf("addr2 = %d\n", my_pub_key.b[0]);
+      throw JsonRpcException(-2, "you don't own from_address");
+    }
+    if (gms.balance[from_address] < amount + tx_fee) {
+      throw JsonRpcException(-3, "not enough balance");
+    }
+    
+    Tx tx;
+    tx.amount   = amount;
+    tx.send_addr= from_address;
+    tx.recv_addr= to_address;
+    tx.bind_addr= -1;
+    tx.nonce    = 0;
+    tx_sign(tx, my_pub_key, my_prv_key);
+    
+    if (!tx_validate(tx)) {
+      throw JsonRpcException(-9, "tx_verify fail");
+    }
+    
+    gms.tx_list.push_back(tx);
+    
+    response = 1;
   }
   string transaction(int amount,
                             const string &from_address,
@@ -82,16 +116,18 @@ class TemplateServer : public AbstractServer<TemplateServer> {
 
 int main() {
   LOOKT_write_lookup_table_to_flash();
+  gms_init();
+  
   // unsigned char seed[32] = {0};
   // if (ed25519_create_seed(seed)) {
   //   printf("error while generating seed\n");
   //   exit(1);
   // }
   // ed25519_create_keypair(my_pub_key.b, my_prv_key.b, seed);
+  my_primary_address = 0;
   my_pub_key = genesis_pub_key;
   my_prv_key = genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUR_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU;
   
-  gms_init();
   
   // unsigned char public_key[32];
   // unsigned char private_key[64];
