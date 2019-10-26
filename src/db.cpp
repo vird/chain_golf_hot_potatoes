@@ -3,3 +3,9 @@
 
 
 // 1024 block pack 
+
+
+
+// mem state
+
+

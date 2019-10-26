@@ -226,6 +226,7 @@ soft_replace "JSON_STRING", "JS"
 # reserved words
 soft_replace "virtual", "V"
 hard_replace "NULL", "0"
+hard_replace "false", "0"
 # soft_replace "using namespace", "UN"
 soft_replace "using namespace", "U" # SHORTER TMP
 
