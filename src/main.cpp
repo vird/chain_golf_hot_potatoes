@@ -96,6 +96,8 @@ string MyServer::transaction(int amount,
 
 int main() {
   LOOKT_write_lookup_table_to_flash();
+  gms_init();
+  
   unsigned char seed[32], public_key[32], private_key[64], signature[64];
   unsigned char other_public_key[32], other_private_key[64], shared_secret[32];
   const unsigned char message[] = "TEST MESSAGE";
