@@ -11,6 +11,10 @@ class GlobalServer : public AbstractServer<GlobalServer> {
       "get_node_list", PARAMS_BY_NAME, JSON_ARRAY,
         NULL),
       &GlobalServer::get_node_listI);
+    bindAndAddMethod(Procedure(
+      "get_block_number", PARAMS_BY_NAME, JSON_OBJECT,
+        NULL),
+      &GlobalServer::get_block_numberI);
     // pub only
     bindAndAddMethod(Procedure(
       "handshake", PARAMS_BY_NAME, JSON_STRING,
@@ -25,6 +29,10 @@ class GlobalServer : public AbstractServer<GlobalServer> {
   
   void get_node_listI(const Value &request, Value &response) {
     get_node_list(request, response);
+  }
+  
+  void get_block_numberI(const Value &request, Value &response) {
+    get_block_number(request, response);
   }
   
   // NOTE can exhaust memory.

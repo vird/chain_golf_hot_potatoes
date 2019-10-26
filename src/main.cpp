@@ -45,6 +45,20 @@ void get_node_list(const Value &request, Value &response) {
     response.append(node);
   }
 }
+void get_block_number(const Value &request, Value &response) {
+  i64 id = request["address"].asInt();
+  if (id < 0) {
+    response = "fail";
+    return;
+    // throw JsonRpcException(-1, "id < 0");
+  }
+  if (id >= gms.main_chain_block_list.size()) {
+    response = "fail";
+    return;
+    // throw JsonRpcException(-1, "id not exists");
+  }
+  block_to_json(gms.main_chain_block_list[id], response);
+}
 #include "local_rpc.cpp"
 #include "global_rpc.cpp"
 

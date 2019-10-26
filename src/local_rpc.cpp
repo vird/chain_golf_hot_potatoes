@@ -19,7 +19,7 @@ class LocalServer : public AbstractServer<LocalServer> {
            NULL),
       &LocalServer::balanceI);
     bindAndAddMethod(Procedure(
-      "shutdown", PARAMS_BY_NAME, JSON_INTEGER,
+      "shutdown", PARAMS_BY_NAME, JSON_STRING,
            NULL),
       &LocalServer::shutdownI);
     bindAndAddMethod(Procedure(
@@ -30,21 +30,21 @@ class LocalServer : public AbstractServer<LocalServer> {
         NULL),
       &LocalServer::transferI);
     bindAndAddMethod(Procedure(
-      "address_transfer", PARAMS_BY_NAME, JSON_INTEGER,
+      "address_transfer", PARAMS_BY_NAME, JSON_STRING,
         "address", JSON_INTEGER,
         "pub_key", JSON_STRING,
         NULL),
       &LocalServer::address_transferI);
     // good for debug
     bindAndAddMethod(Procedure(
-      "debug_set_key", PARAMS_BY_NAME, JSON_INTEGER,
+      "debug_set_key", PARAMS_BY_NAME, JSON_STRING,
         "address", JSON_INTEGER,
         "pub_key", JSON_STRING,
         "prv_key", JSON_STRING,
         NULL),
       &LocalServer::debug_set_keyI);
     bindAndAddMethod(Procedure(
-      "debug_key_gen", PARAMS_BY_NAME, JSON_INTEGER,
+      "debug_key_gen", PARAMS_BY_NAME, JSON_STRING,
         NULL),
       &LocalServer::debug_key_genI);
   }
@@ -72,7 +72,7 @@ class LocalServer : public AbstractServer<LocalServer> {
   void shutdownI(const Value &request, Value &response) {
     printf("shutdown scheduled\n");
     work = false;
-    response = 1;
+    response = "ok";
   }
   
   void transferI(const Value &request, Value &response) {
@@ -127,18 +127,24 @@ class LocalServer : public AbstractServer<LocalServer> {
   void address_transferI(const Value &request, Value &response) {
     u32 address = request["address"].asInt();
     if (gms.a2pk[address] != my_pub_key) {
-      throw JsonRpcException(-2, "you don't own address");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-2, "you don't own address");
     }
     string hex_pub_key = request["pub_key"].asString();
     if (hex_pub_key.size() != 2*t_pub_key_size) {
-      throw JsonRpcException(-1, "bad pub_key size");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad pub_key size");
     }
     for(int i=0;i<2*t_pub_key_size;i++) {
       char ch = hex_pub_key[i];
       if ('0' <= ch && ch <= '9') continue;
       if ('a' <= ch && ch <= 'f') continue;
       if ('A' <= ch && ch <= 'A') continue;
-      throw JsonRpcException(-1, "bad pub_key hex");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad pub_key hex");
     }
     
     Tx tx;
@@ -153,45 +159,57 @@ class LocalServer : public AbstractServer<LocalServer> {
     
     if (!tx_validate(tx)) {
       printf("tx_validate_reason = %d\n", tx_validate_reason);
-      throw JsonRpcException(-9, "tx_validate fail");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-9, "tx_validate fail");
     }
     
     printf("address transfer owner=%d address=%d pub_key=%s\n", my_primary_address, address, hex_pub_key.c_str());
     
     gms.tx_list.push_back(tx);
     
-    response = 1;
+    response = "ok";
   }
   
   void debug_set_keyI(const Value &request, Value &response) {
     u32 address = request["address"].asInt();
     if (address >= gms.balance.size()) {
-      throw JsonRpcException(-1, "Address not exists");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "Address not exists");
     }
     
     // TODO move to define
     string hex_pub_key = request["pub_key"].asString();
     if (hex_pub_key.size() != 2*t_pub_key_size) {
-      throw JsonRpcException(-1, "bad pub_key size");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad pub_key size");
     }
     for(int i=0;i<2*t_pub_key_size;i++) {
       char ch = hex_pub_key[i];
       if ('0' <= ch && ch <= '9') continue;
       if ('a' <= ch && ch <= 'f') continue;
       if ('A' <= ch && ch <= 'A') continue;
-      throw JsonRpcException(-1, "bad pub_key hex");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad pub_key hex");
     }
     
     string hex_prv_key = request["prv_key"].asString();
     if (hex_prv_key.size() != 2*t_prv_key_size) {
-      throw JsonRpcException(-1, "bad prv_key size");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad prv_key size");
     }
     for(int i=0;i<2*t_prv_key_size;i++) {
       char ch = hex_prv_key[i];
       if ('0' <= ch && ch <= '9') continue;
       if ('a' <= ch && ch <= 'f') continue;
       if ('A' <= ch && ch <= 'A') continue;
-      throw JsonRpcException(-1, "bad prv_key hex");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad prv_key hex");
     }
     
     t_pub_key pub_key;
@@ -203,7 +221,9 @@ class LocalServer : public AbstractServer<LocalServer> {
     if (gms.a2pk[address] != pub_key) {
       pub_key_print("pub_key           = ", pub_key);
       pub_key_print("gms.a2pk[address] = ", gms.a2pk[address]);
-      throw JsonRpcException(-2, "address and pub_key mismatch");
+      response = "fail";
+      return;
+      // throw JsonRpcException(-2, "address and pub_key mismatch");
     }
     
     my_primary_address = address;
@@ -212,14 +232,15 @@ class LocalServer : public AbstractServer<LocalServer> {
     pub_key_print("my_pub_key           = ", my_pub_key);
     prv_key_print("my_prv_key           = ", my_prv_key);
     
-    response = 1;
+    response = "ok";
   }
   
   void debug_key_genI(const Value &request, Value &response) {
     unsigned char seed[32];
     if (ed25519_create_seed(seed)) {
-      printf("error while generating seed\n");
-      exit(1);
+      response = "fail";
+      return;
+      // throw JsonRpcException(-2, "error while generating seed");
     }
     t_pub_key pub_key;
     t_prv_key prv_key;
@@ -228,6 +249,6 @@ class LocalServer : public AbstractServer<LocalServer> {
     pub_key_print("pub_key = ", pub_key);
     prv_key_print("prv_key = ", prv_key);
     
-    response = 1;
+    response = "ok";
   }
 };

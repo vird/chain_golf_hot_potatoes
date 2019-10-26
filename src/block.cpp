@@ -15,6 +15,7 @@ u64 hash2weight(t_hash &hash) {
 #define SL1 \
   const int len = (                                                                         \
     sizeof(u32      )+                                                                      \
+    sizeof(u32      )+                                                                      \
     sizeof(t_hash   )+                                                                      \
     sizeof(t_hash   )+                                                                      \
     sizeof(u32      )+                                                                      \
@@ -24,6 +25,7 @@ u64 hash2weight(t_hash &hash) {
   u8 buffer[len];                                                                           \
   u8 *buf_ptr = (u8*)&buffer;                                                               \
   u32 s = 0;                                                                               \
+  memcpy(buf_ptr, &header.id                , s=sizeof(header.id              ));buf_ptr+=s;   \
   memcpy(buf_ptr, &header.version           , s=sizeof(header.version         ));buf_ptr+=s;   \
   memcpy(buf_ptr, &header.prev_hash         , s=sizeof(header.prev_hash       ));buf_ptr+=s;   \
   memcpy(buf_ptr, &header.merkle_tree       , s=sizeof(header.merkle_tree     ));buf_ptr+=s;   \
@@ -49,6 +51,19 @@ bool block_header_validate(Block_header &header) {
   sha512_final(&ctx, (u8*)&cmp_hash);
   if (cmp_hash != header.hash) return false;
   return ed25519_verify(header.sign.b, (u8*)&buffer, len, header.issuer_pub_key.b);
+}
+
+void block_header_to_json(Block_header &header, Value &value) {
+  value["id"]           = header.id              ;
+  value["version"]      = header.version         ;
+  // header.prev_hash       ;
+  // header.merkle_tree     ;
+  value["issuer_addr"]  = header.issuer_addr         ;
+  // header.issuer_pub_key.b;
+  value["nonce"]        = header.nonce         ;
+  // header.hash
+  // header.sign
+  value["weight"]       = header.weight         ;
 }
 
 // SIGN_LEN
@@ -122,6 +137,15 @@ void tx_apply(Tx &tx) {
   }
 }
 
+void tx_to_json(Tx &tx, Value &value) {
+  value["type"]     = tx.type      ;
+  value["amount"]   = tx.amount    ;
+  // value["send_addr"]= tx.send_addr ;
+  // value["recv_addr"]= tx.recv_addr ;
+  // tx.bind_pub_key.b
+  value["nonce"]    = tx.nonce     ;
+}
+
 // block
 void merkle_tree_calc(vector<Tx> &tx_list, t_hash &res) {
   memset(res.b, 0, sizeof(t_hash));
@@ -168,4 +192,19 @@ void block_weight_calc(Block &block) {
   }
   weight += block.header.weight = hash2weight(block.header.hash);
   block.weight = weight;
+}
+
+void block_to_json(Block &block, Value &value) {
+  Value header;
+  block_header_to_json(block.header, header);
+  Value tx_list;
+  for(auto it = block.tx_list.begin(), end = block.tx_list.end(); it != end; ++it) {
+    Value tx;
+    tx_to_json(*it, tx);
+    tx_list.append(tx);
+  }
+  
+  value["header"] = header;
+  value["tx_list"] = tx_list;
+  value["weight"] = block.weight;
 }
