@@ -82,13 +82,14 @@ class TemplateServer : public AbstractServer<TemplateServer> {
 
 int main() {
   LOOKT_write_lookup_table_to_flash();
-  unsigned char seed[32] = {0};
-  
-  if (ed25519_create_seed(seed)) {
-    printf("error while generating seed\n");
-    exit(1);
-  }
-  ed25519_create_keypair(my_pub_key.b, my_prv_key.b, seed);
+  // unsigned char seed[32] = {0};
+  // if (ed25519_create_seed(seed)) {
+  //   printf("error while generating seed\n");
+  //   exit(1);
+  // }
+  // ed25519_create_keypair(my_pub_key.b, my_prv_key.b, seed);
+  my_pub_key = genesis_pub_key;
+  my_prv_key = genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUT_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU;
   
   gms_init();
   

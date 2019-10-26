@@ -39,6 +39,9 @@ void gms_init() {
   block.header.nonce = 0;
   block_sign(block, genesis_pub_key, genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUT_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU);
   block_weight_calc(block);
+  if (!block_validate(block)) {
+    throw new Exception("block validation failed for our own block");
+  }
   block_apply(block);
   gms.main_chain_block_list.push_back(block);
 }
@@ -53,6 +56,9 @@ void block_emit() {
   block_sign(block, my_pub_key, my_prv_key);
   block_weight_calc(block);
   gms.main_chain_block_list.push_back(block);
+  if (!block_validate(block)) {
+    throw new Exception("block validation failed for our own block");
+  }
   block_apply(block);
   if (block.header.id % 100 == 0) {
     printf("block id=%d\n", block.header.id);
