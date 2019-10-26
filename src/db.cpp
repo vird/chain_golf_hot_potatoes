@@ -1,6 +1,15 @@
 // single block
-
-
+int block_pack_size(Block &block) {
+  int res = 0;
+  
+  return res;
+}
+void block_pack(Block &block) {
+  
+}
+void block_unpack(Block &block) {
+  
+}
 
 // 1024 block pack 
 

@@ -22,6 +22,7 @@ unpack_include = (code)->
   code
 
 compact_preprocessor = (code)->
+  code = code.replace `/ {2,}/g`, ' '
   code = code.replace /\\\n/g, ''
 
 strip_comments = (code)->
@@ -29,6 +30,7 @@ strip_comments = (code)->
   code = code.replace /\n\s*\/\/.*/g, ''
 
 strip_empty_lines = (code)->
+  code = code.replace /\n\s+/g, '\n'
   code = code.replace /\n{2,}/g, '\n'
 
 strip_token_and_new_line = (code)->
@@ -41,7 +43,7 @@ fix_semicolon_preproc = (code)->
   
 
 strip_operator_space = (code)->
-  code = code.replace /\s*([-=,:*+^]|<<|>>)\s*/g, '$1'
+  code = code.replace /\s*([-=,:*+^|]|<<|>>|[{}\(\)])\s*/g, '$1'
 
 str2tok = (str)->
   ret = []
@@ -109,10 +111,11 @@ tok2str = (list)->
     ret.push v.code
   ret.join ''
 
-tok_map = (list, fn)->
+tok_map = (list, fn, all = false)->
   for v in list
-    continue if v.type == 'string'
-    continue if v.type == 'include'
+    unless all
+      continue if v.type == 'string'
+      continue if v.type == 'include'
     v.code = fn v.code
   return
 # ###################################################################################################
@@ -135,7 +138,7 @@ _prop_print = (letter_count)->
     continue if v <= 2
     kv_list.push {k,v}
 
-  kv_list.sort (a,b)->a.v-b.v
+  kv_list.sort (a,b)->a.v*a.k.length-b.v*b.k.length
   puts "#{letter_count} letter"
   for kv in kv_list
     {k,v} = kv
@@ -166,7 +169,7 @@ tok_list = str2tok main
 if argv.pack
   tok_map tok_list, strip_comments
   tok_map tok_list, strip_empty_lines
-  tok_map tok_list, strip_operator_space
+  tok_map tok_list, strip_operator_space, all=true
   tok_map tok_list, strip_token_and_new_line
 
 # ###################################################################################################
@@ -260,6 +263,8 @@ for k,v of replace_map
 if argv.advice
   tok_map tok_list, prop_fill
   prop_print()
+  
+  
 # INJECT delayed, because wasting stats
 tok_list.unshift {
   type : 'raw'
@@ -267,6 +272,35 @@ tok_list.unshift {
 }
 
 main = tok2str tok_list
+if argv.gramm
+  char_hash = {}
+  for v in main
+    char_hash[v] ?= 0
+    char_hash[v]++
+  kv_list = []
+  for k,v of char_hash
+    kv_list.push {k,v}
+  kv_list.sort (a,b)->a.v-b.v
+  puts "1-gramm"
+  for kv in kv_list
+    {k,v} = kv
+    puts "#{JSON.stringify(k).rjust 6} => #{v}"
+  
+  bigram_hash = {}
+  for k in [0 ... main.length-2]
+    slice = main.slice(k, k+2)
+    bigram_hash[slice] ?= 0
+    bigram_hash[slice]++
+  kv_list = []
+  for k,v of bigram_hash
+    kv_list.push {k,v}
+  kv_list.sort (a,b)->a.v-b.v
+  puts "2-gramm"
+  for kv in kv_list
+    {k,v} = kv
+    puts "#{JSON.stringify(k).rjust 6} => #{v}"
+  
+
 if argv.pack
   main = fix_semicolon_preproc main
 
