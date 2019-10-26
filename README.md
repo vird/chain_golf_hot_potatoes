@@ -2,6 +2,13 @@
 
 Simple cryptocurrency with codegolf minimizer for hackathon.
 
+## Features
+
+  * ed25519 signature
+  * sha512 hash
+  * semi-automatic code minifier
+  * -40kb (in packed) ed25519 codebase with replacing precomputed table with runtime ones
+
 # How to install
 ## Dependencies
 
@@ -28,8 +35,14 @@ Simple cryptocurrency with codegolf minimizer for hackathon.
 
    ./build.coffee
 
+## How to test in docker
+**under construction**
+
+    # ensure your build is up to date
+    ./run_test.sh
+
 # Credits
-### used libraries
+### Used libraries
 
   * https://github.com/orlp/ed25519
     * digital signature
