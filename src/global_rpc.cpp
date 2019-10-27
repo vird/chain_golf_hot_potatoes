@@ -54,9 +54,17 @@ class GlobalServer : public AbstractServer<GlobalServer> {
     // TODO verify format better
     // TODO normalize
     auto end = gns.node_list.end();
-    auto it = find(gns.node_list.begin(), end, rev_ip_port);
-    if (it == end) {
-      gns.node_list.push_back(rev_ip_port);
+    bool found = false;
+    FOR_COL(it, gns.node_list) {
+      if (it->ip_port == rev_ip_port) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      NetNode node;
+      node.ip_port = rev_ip_port;
+      gns.node_list.push_back(node);
     }
     
     response = "ok";

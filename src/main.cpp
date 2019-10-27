@@ -46,7 +46,8 @@ void rpc_bc_height(const Value &request, Value &response) {
 void rpc_get_node_list(const Value &request, Value &response) {
   FOR_COL(it, gns.node_list) {
     Value node;
-    node["ip_port_pair"] = *it;
+    node["is_self"] = it->is_self;
+    node["ip_port"] = it->ip_port;
     response.append(node);
   }
 }
@@ -140,7 +141,10 @@ int main(int argc, char **argv) {
             string addr_port = addressBuffer;
             addr_port += ":";
             addr_port += to_string(RPC_PUB_PORT);
-            gns.node_list.push_back(addr_port);
+            NetNode node;
+            node.is_self = true;
+            node.ip_port = addr_port;
+            gns.node_list.push_back(node);
         }/* else if (ifa->ifa_addr->sa_family == AF_INET6) { // check it is IP6
             // is a valid IP6 Address
             tmpAddrPtr=&((struct sockaddr_in6 *)ifa->ifa_addr)->sin6_addr;
@@ -151,14 +155,17 @@ int main(int argc, char **argv) {
             string addr_port = addressBuffer;
             addr_port += ":";
             addr_port += to_string(RPC_PUB_PORT);
-            gns.node_list.push_back(addr_port);
+            NetNode node;
+            node.is_self = true;
+            node.ip_port = addr_port;
+            gns.node_list.push_back(node);
         }*/
     }
     if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
   }
   
   FOR_COL(it, gns.node_list) {
-    if (*it == seed_ip_port) {
+    if (it->ip_port == seed_ip_port) {
       i_am_seed_node = true;
     }
   }
