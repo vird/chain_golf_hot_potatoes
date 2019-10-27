@@ -5,3 +5,5 @@ pub_client.h
 pub_server.h
 prv_client.h
 prv_server.h
+q.sh
+d.sh

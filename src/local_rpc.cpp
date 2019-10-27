@@ -15,30 +15,44 @@ class LocalServer : public AbstractServer<LocalServer> {
     // prv only
     bindAndAddMethod(Procedure(
       "get_balance", PARAMS_BY_NAME, JSON_INTEGER,
-         "address", JSON_INTEGER,
+         "address", JSON_STRING,
            NULL),
       &LocalServer::balanceI);
+    bindAndAddMethod(Procedure(
+      "transfer", PARAMS_BY_NAME, JSON_STRING,
+        "amount", JSON_INTEGER,
+        "from_address", JSON_STRING,
+        "to_address", JSON_STRING,
+        NULL),
+      &LocalServer::transferI);
+    bindAndAddMethod(Procedure(
+      "address_transfer", PARAMS_BY_NAME, JSON_STRING,
+        "address", JSON_STRING,
+        "pub_key", JSON_STRING,
+        NULL),
+      &LocalServer::address_transferI);
+    // service
     bindAndAddMethod(Procedure(
       "shutdown", PARAMS_BY_NAME, JSON_STRING,
            NULL),
       &LocalServer::shutdownI);
     bindAndAddMethod(Procedure(
-      "transfer", PARAMS_BY_NAME, JSON_STRING,
-        "amount", JSON_INTEGER,
-        "from_address", JSON_INTEGER,
-        "to_address", JSON_INTEGER,
+      "set_tx_mining_mode", PARAMS_BY_NAME, JSON_STRING,
+        "enabled", JSON_INTEGER,
         NULL),
-      &LocalServer::transferI);
+      &LocalServer::set_tx_mining_modeI);
     bindAndAddMethod(Procedure(
-      "address_transfer", PARAMS_BY_NAME, JSON_STRING,
-        "address", JSON_INTEGER,
-        "pub_key", JSON_STRING,
+      "get_tx_mining_mode", PARAMS_BY_NAME, JSON_INTEGER,
         NULL),
-      &LocalServer::address_transferI);
+      &LocalServer::get_tx_mining_modeI);
+    bindAndAddMethod(Procedure(
+      "get_my_weight", PARAMS_BY_NAME, JSON_INTEGER,
+        NULL),
+      &LocalServer::get_my_weightI);
     // good for debug
     bindAndAddMethod(Procedure(
       "debug_set_key", PARAMS_BY_NAME, JSON_STRING,
-        "address", JSON_INTEGER,
+        "address", JSON_STRING,
         "pub_key", JSON_STRING,
         "prv_key", JSON_STRING,
         NULL),
@@ -60,7 +74,12 @@ class LocalServer : public AbstractServer<LocalServer> {
   void balanceI(const Value &request, Value &response) {
     // const char* addr = request["address"].asString().c_str();
     // u32 address = atoi(addr);
-    u32 address = request["address"].asInt();
+    u32 address;
+    if (!address_json_parse(request["address"], address)) {
+      response = 0;
+      return;
+      // throw JsonRpcException(-1, "Invalid address");
+    }
     if (address >= gms.balance.size()) {
       response = 0;
       return;
@@ -75,16 +94,48 @@ class LocalServer : public AbstractServer<LocalServer> {
     response = "ok";
   }
   
+  void set_tx_mining_modeI(const Value &request, Value &response) {
+    tx_mining_mode = request["enabled"].asInt();
+    response = "ok";
+  }
+  
+  void get_tx_mining_modeI(const Value &request, Value &response) {
+    response = tx_mining_mode;
+  }
+  
+  void get_my_weightI(const Value &request, Value &response) {
+    // TODO binary search
+    for(auto it = gms.aw_sort_list.begin(), end = gms.aw_sort_list.end(); it != end; ++it) {
+      if (it->account == my_primary_address) {
+        response = it->weight;
+        return;
+      }
+    }
+    
+    response = 0;
+  }
+  
   void transferI(const Value &request, Value &response) {
     u32 amount = request["amount"].asInt();
     
-    u32 from_address = request["from_address"].asInt();
+    u32 from_address;
+    if (!address_json_parse(request["from_address"], from_address)) {
+      response = 0;
+      return;
+      // throw JsonRpcException(-1, "Invalid from_address");
+    }
     if (from_address >= gms.balance.size()) {
       response = "fail";
       return;
       // throw JsonRpcException(-1, "from_address not exists");
     }
-    u32 to_address = request["to_address"].asInt();
+    
+    u32 to_address;
+    if (!address_json_parse(request["to_address"], to_address)) {
+      response = 0;
+      return;
+      // throw JsonRpcException(-1, "Invalid to_address");
+    }
     if (to_address >= gms.balance.size()) {
       response = "fail";
       return;
@@ -125,7 +176,12 @@ class LocalServer : public AbstractServer<LocalServer> {
   }
   
   void address_transferI(const Value &request, Value &response) {
-    u32 address = request["address"].asInt();
+    u32 address;
+    if (!address_json_parse(request["address"], address)) {
+      response = 0;
+      return;
+      // throw JsonRpcException(-1, "Invalid address");
+    }
     if (gms.a2pk[address] != my_pub_key) {
       response = "fail";
       return;
@@ -172,7 +228,12 @@ class LocalServer : public AbstractServer<LocalServer> {
   }
   
   void debug_set_keyI(const Value &request, Value &response) {
-    u32 address = request["address"].asInt();
+    u32 address;
+    if (!address_json_parse(request["address"], address)) {
+      response = 0;
+      return;
+      // throw JsonRpcException(-1, "Invalid address");
+    }
     if (address >= gms.balance.size()) {
       response = "fail";
       return;

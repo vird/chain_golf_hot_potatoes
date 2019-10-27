@@ -31,6 +31,7 @@ using namespace Json;
 #include "verify.c"
 #include "sha512.c"
 // blockchain stuff
+#include "address.cpp"
 #include "block.cpp"
 #include "db.cpp"
 #include "net.cpp"

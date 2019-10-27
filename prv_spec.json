@@ -63,6 +63,16 @@
     "returns": "ok/fail"
   },
   {
+    "name" : "get_tx_mining_mode",
+    "params": {},
+    "returns": "ok/fail"
+  },
+  {
+    "name" : "get_my_weight",
+    "params": {},
+    "returns": 0
+  },
+  {
     "name" : "get_address_pub_key",
     "params": {
       "address": "address"

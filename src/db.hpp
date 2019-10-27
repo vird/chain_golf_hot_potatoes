@@ -13,6 +13,9 @@ struct Acc_weight_pair {
   u64 weight;
 };
 
+
+bool tx_mining_mode = false;
+
 struct MemState {
   // TODO Block hash -> map
   u32 main_chain_block_offset = 0;
