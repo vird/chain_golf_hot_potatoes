@@ -106,21 +106,22 @@ bool tx_validate(Tx &tx) {
   switch(tx.type) {
     case 1: // transfer
       // overflow protection
-      if (gms.balance[tx.send_addr] < max(tx.amount, tx.amount + tx_fee)) RET(3)
+      if (gms.balance[tx.send_addr] < max(tx.amount, tx.amount + tx_fee)) RET(10)
       break;
     case 2: // address_transfer
-      if (tx.recv_addr >= L) RET(4)
-      if (send_pub_key != gms.a2pk[tx.recv_addr]) RET(5)
+      if (gms.balance[tx.send_addr] < tx_fee) RET(20)
+      if (tx.recv_addr >= L) RET(21)
+      if (send_pub_key != gms.a2pk[tx.recv_addr]) RET(22)
       break;
     default:
-      RET(6)
+      RET(30)
   }
   
   SL2
   t_hash cmp_hash;
   sha512_final(&ctx, (u8*)&cmp_hash);
-  if (cmp_hash != tx.hash) RET(7)
-  if (!ed25519_verify(tx.sign.b, (u8*)&buffer, len, send_pub_key.b)) RET(8)
+  if (cmp_hash != tx.hash) RET(3)
+  if (!ed25519_verify(tx.sign.b, (u8*)&buffer, len, send_pub_key.b)) RET(4)
   return true;
 }
 
@@ -132,6 +133,7 @@ void tx_apply(Tx &tx) {
       break;
     
     case 2: // address_transfer
+      gms.balance[tx.send_addr] -= tx_fee;
       gms.a2pk[tx.recv_addr] = tx.bind_pub_key;
       break;
   }
