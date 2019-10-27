@@ -1,5 +1,6 @@
 #define throw(...)
 #include <jsonrpccpp/client.h>
+#include <jsonrpccpp/client/connectors/httpclient.h>
 #undef throw
 #define ERR Errors::ERROR_CLIENT_INVALID_RESPONSE
 

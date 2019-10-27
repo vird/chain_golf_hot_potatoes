@@ -39,38 +39,18 @@ using namespace Json;
 #include "address.cpp"
 #include "block.cpp"
 #include "db.cpp"
-#include "net.cpp"
-
-void rpc_bc_height(const Value &request, Value &response) {
-  response = bc_height();
-}
-void rpc_get_node_list(const Value &request, Value &response) {
-  FOR_COL(it, gns.node_list) {
-    Value node;
-    node["is_self"] = it->is_self;
-    node["ip_port"] = it->ip_port;
-    response.append(node);
-  }
-}
-void rpc_get_block_number(const Value &request, Value &response) {
-  // не совсем конкретно, т.к. есть offset
-  // если вылетаем за пределы offset'а снизу, то надо читать с базы...
-  i64 id = request["id"].asInt();
-  if (id < 0) {
-    response = "fail";
-    return;
-    // throw JsonRpcException(-1, "id < 0");
-  }
-  if (id >= gms.main_chain_block_list.size()) {
-    response = "fail";
-    return;
-    // throw JsonRpcException(-1, "id not exists");
-  }
-  block_to_json(gms.main_chain_block_list[id], response);
-}
+// net
+#include "net.hpp"
+#include "rpc_util.cpp"
 #include "rpc_server_local.cpp"
 #include "rpc_server_global.cpp"
-#include "rpc_client.cpp"
+/* #include "rpc_client.cpp" */
+#define throw(...)
+#include <jsonrpccpp/client.h>
+#include <jsonrpccpp/client/connectors/httpclient.h>
+#undef throw
+
+#include "net.cpp"
 
 int main(int argc, char **argv) {
   // ed25519 calc table
@@ -138,9 +118,10 @@ int main(int argc, char **argv) {
             tmpAddrPtr=&((struct sockaddr_in *)ifa->ifa_addr)->sin_addr;
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-            if (!strcmp(addressBuffer,"127.0.0.1")) continue;
+            if (!strcmp(addressBuffer, "127.0.0.1")) continue;
             printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
-            string addr_port = addressBuffer;
+            string addr_port = "http://";
+            addr_port += addressBuffer;
             addr_port += ":";
             addr_port += to_string(RPC_PUB_PORT);
             NetNode node;
@@ -154,8 +135,9 @@ int main(int argc, char **argv) {
             inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
             if (!strcmp(addressBuffer,"::1")) continue;
             printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
-            string addr_port = addressBuffer;
-            addr_port += ":";
+            string addr_port = "http://[";
+            addr_port += addressBuffer;
+            addr_port += "]:";
             addr_port += to_string(RPC_PUB_PORT);
             NetNode node;
             node.is_self = true;
@@ -209,6 +191,10 @@ int main(int argc, char **argv) {
   }
   if (i_am_seed_node) {
     gms_init();
+  } else {
+    NetNode node;
+    node.ip_port = seed_ip_port;
+    gns.node_list.push_back(node);
   }
   
   HttpServer hs1(RPC_PRV_PORT);
@@ -223,12 +209,15 @@ int main(int argc, char **argv) {
   printf("i_am_seed_node_ %d\n", i_am_seed_node);
   printf("welcome to UTON HACK!\n");
   while(s1.work) {
+    net_tick();
     if (!gms.ready) {
       this_thread::sleep_for(chrono::milliseconds(1000));
       printf("node is not ready bc_height = %d / %d\n", bc_height(), gms.target_bc_height);
     } else {
       block_emit();
-      this_thread::sleep_for(chrono::milliseconds(10));
+      // this_thread::sleep_for(chrono::milliseconds(10));
+      // FOR DEBUG
+      this_thread::sleep_for(chrono::milliseconds(100));
     }
   }
   s1.StopListening();
