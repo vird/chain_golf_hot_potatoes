@@ -1,5 +1,6 @@
 #include "block.hpp"
 #include "db.hpp"
+#include "net.hpp"
 
 u64 hash2weight(t_hash &hash) {
   u64 res = 0;
@@ -44,6 +45,9 @@ void block_header_sign(Block_header &header, t_pub_key &pub_key, t_prv_key &prv_
 }
 
 bool block_header_validate(Block_header &header) {
+  if (gms.main_chain_block_list.size()) {
+    if (header.id - 1 != gms.main_chain_block_list.back().header.id) return false;
+  }
   if (header.issuer_addr >= gms.a2pk.size()) return false;
   if (header.issuer_pub_key != gms.a2pk[header.issuer_addr]) return false;
   SL1
@@ -221,6 +225,10 @@ void block_apply(Block &block) {
   }
   // issue 1 addr
   gms_account_new(block.header.issuer_pub_key);
+  gms.main_chain_block_list.push_back(block);
+  FOR_COL(it, gns.node_list) {
+    it->is_proposal_valid = false;
+  }
 }
 
 void block_weight_calc(Block &block) {

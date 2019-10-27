@@ -34,7 +34,6 @@ void gms_init() {
     throw new Exception("block validation failed for our own block");
   }
   block_apply(block);
-  gms.main_chain_block_list.push_back(block);
   gms.ready = true;
 }
 
@@ -61,7 +60,6 @@ void block_propose() {
   gms.tx_list.clear();
   block_sign(block, my_pub_key, my_prv_key);
   block_weight_calc(block);
-  gms.main_chain_block_list.push_back(block);
   if (!block_validate(block)) {
     throw new Exception("block validation failed for our own block");
   }

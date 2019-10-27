@@ -208,10 +208,17 @@ int main(int argc, char **argv) {
   printf("seed_ip_port___ %s\n", seed_ip_port.c_str());
   printf("i_am_seed_node_ %d\n", i_am_seed_node);
   printf("welcome to UTON HACK!\n");
+  u32 last_bc = 0;
   while(s1.work) {
     net_tick();
     if (!gms.ready) {
-      this_thread::sleep_for(chrono::milliseconds(1000));
+      u32 new_bc = bc_height();
+      if (last_bc == new_bc) {
+        this_thread::sleep_for(chrono::milliseconds(1000));
+      } else {
+        last_bc = new_bc;
+        this_thread::sleep_for(chrono::milliseconds(1));
+      }
       printf("node is not ready bc_height = %d / %d\n", bc_height(), gms.target_bc_height);
     } else {
       // block propose
@@ -219,8 +226,7 @@ int main(int argc, char **argv) {
       // subticks
       for(int i=0;i<5;i++) {
         net_tick();
-        // с таким количеством как мы срем... 10 ms это мало
-        this_thread::sleep_for(chrono::milliseconds(10));
+        this_thread::sleep_for(chrono::milliseconds(20));
       }
       // block commit
       // Все кто хотел должны были уже договориться...
