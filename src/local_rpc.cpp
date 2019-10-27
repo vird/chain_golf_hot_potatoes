@@ -64,11 +64,11 @@ class LocalServer : public AbstractServer<LocalServer> {
   }
   
   void bc_heightI(const Value &request, Value &response) {
-    bc_height(request, response);
+    rpc_bc_height(request, response);
   }
   
   void get_node_listI(const Value &request, Value &response) {
-    get_node_list(request, response);
+    rpc_get_node_list(request, response);
   }
   
   void balanceI(const Value &request, Value &response) {
@@ -105,7 +105,7 @@ class LocalServer : public AbstractServer<LocalServer> {
   
   void get_my_weightI(const Value &request, Value &response) {
     // TODO binary search
-    for(auto it = gms.aw_sort_list.begin(), end = gms.aw_sort_list.end(); it != end; ++it) {
+    FOR_COL(it, gms.aw_sort_list) {
       if (it->account == my_primary_address) {
         response = it->weight;
         return;
@@ -120,7 +120,7 @@ class LocalServer : public AbstractServer<LocalServer> {
     
     u32 from_address;
     if (!address_json_parse(request["from_address"], from_address)) {
-      response = 0;
+      response = "fail";
       return;
       // throw JsonRpcException(-1, "Invalid from_address");
     }
@@ -132,7 +132,7 @@ class LocalServer : public AbstractServer<LocalServer> {
     
     u32 to_address;
     if (!address_json_parse(request["to_address"], to_address)) {
-      response = 0;
+      response = "fail";
       return;
       // throw JsonRpcException(-1, "Invalid to_address");
     }
@@ -178,11 +178,19 @@ class LocalServer : public AbstractServer<LocalServer> {
   void address_transferI(const Value &request, Value &response) {
     u32 address;
     if (!address_json_parse(request["address"], address)) {
-      response = 0;
+      response = "fail";
       return;
       // throw JsonRpcException(-1, "Invalid address");
     }
+    if (address >= gms.a2pk.size()) {
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "to_address not exists");
+    }
     if (gms.a2pk[address] != my_pub_key) {
+      printf("you don't own address %d\n", address);
+      t_pub_key_print("my_pub_key        = ", my_pub_key);
+      t_pub_key_print("gms.a2pk[address] = ", gms.a2pk[address]);
       response = "fail";
       return;
       // throw JsonRpcException(-2, "you don't own address");
@@ -230,7 +238,7 @@ class LocalServer : public AbstractServer<LocalServer> {
   void debug_set_keyI(const Value &request, Value &response) {
     u32 address;
     if (!address_json_parse(request["address"], address)) {
-      response = 0;
+      response = "fail";
       return;
       // throw JsonRpcException(-1, "Invalid address");
     }
@@ -297,19 +305,18 @@ class LocalServer : public AbstractServer<LocalServer> {
   }
   
   void debug_key_genI(const Value &request, Value &response) {
-    unsigned char seed[32];
-    if (ed25519_create_seed(seed)) {
-      response = "fail";
-      return;
-      // throw JsonRpcException(-2, "error while generating seed");
-    }
     t_pub_key pub_key;
     t_prv_key prv_key;
-    ed25519_create_keypair(pub_key.b, prv_key.b, seed);
+    if (!key_gen(pub_key, prv_key)) {
+      response = "fail";
+      return;
+      // throw JsonRpcException(-2, "error while generating keypair");
+    }
     
     t_pub_key_print("pub_key = ", pub_key);
     t_prv_key_print("prv_key = ", prv_key);
     
-    response = "ok";
+    response["pub_key"] = t_pub_key2str(pub_key);
+    response["prv_key"] = t_prv_key2str(prv_key);
   }
 };

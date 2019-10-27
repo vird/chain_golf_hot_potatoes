@@ -91,7 +91,10 @@
   {
     "name" : "debug_key_gen",
     "params": {},
-    "returns": "ok/fail"
+    "returns": {
+      "pub_key": "pub_key",
+      "prv_key": "prv_key"
+    }
   },
   {
     "name" : "debug_get_pub_key",

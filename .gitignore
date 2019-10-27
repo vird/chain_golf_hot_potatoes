@@ -7,3 +7,5 @@ prv_client.h
 prv_server.h
 q.sh
 d.sh
+genesis.sh
+*.key

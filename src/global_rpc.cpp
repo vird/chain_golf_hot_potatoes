@@ -24,15 +24,15 @@ class GlobalServer : public AbstractServer<GlobalServer> {
   }
   
   void bc_heightI(const Value &request, Value &response) {
-    bc_height(request, response);
+    rpc_bc_height(request, response);
   }
   
   void get_node_listI(const Value &request, Value &response) {
-    get_node_list(request, response);
+    rpc_get_node_list(request, response);
   }
   
   void get_block_numberI(const Value &request, Value &response) {
-    get_block_number(request, response);
+    rpc_get_block_number(request, response);
   }
   
   // NOTE can exhaust memory.

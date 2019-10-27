@@ -149,7 +149,7 @@ void tx_to_json(Tx &tx, Value &value) {
 // block
 void merkle_tree_calc(vector<Tx> &tx_list, t_hash &res) {
   memset(res.b, 0, sizeof(t_hash));
-  for(auto it = tx_list.begin(), end = tx_list.end(); it != end; ++it) {
+  FOR_COL(it, tx_list) {
     sha512_context ctx;
     sha512_init(&ctx);
     sha512_update(&ctx, res.b, sizeof(res.b));
@@ -160,7 +160,7 @@ void merkle_tree_calc(vector<Tx> &tx_list, t_hash &res) {
 
 bool block_validate(Block &block) {
   block_header_validate(block.header);
-  for(auto it = block.tx_list.begin(), end = block.tx_list.end(); it != end; ++it) {
+  FOR_COL(it, block.tx_list) {
     if (!tx_validate(*it)) return false;
   }
   
@@ -176,7 +176,7 @@ void block_sign(Block &block, t_pub_key &pub_key, t_prv_key &prv_key) {
 }
 void block_apply(Block &block) {
   // all tx
-  for(auto it = block.tx_list.begin(), end = block.tx_list.end(); it != end; ++it) {
+  FOR_COL(it, block.tx_list) {
     tx_apply(*it);
   }
   // лёгкий способ быстро просуммировать все tx_fee
@@ -187,7 +187,7 @@ void block_apply(Block &block) {
 
 void block_weight_calc(Block &block) {
   u32 weight = 0;
-  for(auto it = block.tx_list.begin(), end = block.tx_list.end(); it != end; ++it) {
+  FOR_COL(it, block.tx_list) {
     weight += it->weight = hash2weight(it->hash);
   }
   weight += block.header.weight = hash2weight(block.header.hash);
@@ -198,7 +198,7 @@ void block_to_json(Block &block, Value &value) {
   Value header;
   block_header_to_json(block.header, header);
   Value tx_list;
-  for(auto it = block.tx_list.begin(), end = block.tx_list.end(); it != end; ++it) {
+  FOR_COL(it, block.tx_list) {
     Value tx;
     tx_to_json(*it, tx);
     tx_list.append(tx);

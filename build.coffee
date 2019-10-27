@@ -162,6 +162,9 @@ prop_print = ()->
 process.chdir 'src'
 main = fs.readFileSync "main.cpp", 'utf-8'
 main = unpack_include main
+if argv.jsonrpc_debug
+  main = main.replace /return;[\n\s]+\/\/ throw/g, 'throw'
+
 main = compact_preprocessor main
 process.chdir '..'
 

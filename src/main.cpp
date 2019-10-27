@@ -15,6 +15,8 @@
 #include<algorithm>
 #include<vector>
 #include<cstring>
+#include<getopt.h>
+#define FOR_COL(it, arr) for(auto it = arr.begin(), end = arr.end(); it != end; ++it)
 
 using namespace std;
 using namespace jsonrpc;
@@ -30,24 +32,28 @@ using namespace Json;
 #include "sign.c"
 #include "verify.c"
 #include "sha512.c"
+// util
+#include "fs.cpp"
 // blockchain stuff
 #include "address.cpp"
 #include "block.cpp"
 #include "db.cpp"
 #include "net.cpp"
 
-void bc_height(const Value &request, Value &response) {
-  response = (u64)gms.main_chain_block_list.size();
+void rpc_bc_height(const Value &request, Value &response) {
+  response = bc_height();
 }
-void get_node_list(const Value &request, Value &response) {
-  for(auto it = gns.node_list.begin(), end = gns.node_list.end(); it != end; ++it) {
+void rpc_get_node_list(const Value &request, Value &response) {
+  FOR_COL(it, gns.node_list) {
     Value node;
     node["ip_port_pair"] = *it;
     response.append(node);
   }
 }
-void get_block_number(const Value &request, Value &response) {
-  i64 id = request["address"].asInt();
+void rpc_get_block_number(const Value &request, Value &response) {
+  // не совсем конкретно, т.к. есть offset
+  // если вылетаем за пределы offset'а снизу, то надо читать с базы...
+  i64 id = request["id"].asInt();
   if (id < 0) {
     response = "fail";
     return;
@@ -63,7 +69,56 @@ void get_block_number(const Value &request, Value &response) {
 #include "local_rpc.cpp"
 #include "global_rpc.cpp"
 
-int main() {
+int main(int argc, char **argv) {
+  // ed25519 calc table
+  LOOKT_write_lookup_table_to_flash();
+  
+  //argv
+  int option_index = 0;
+  static struct option long_options[] = {
+    //name              has_arg flag val
+    {"rpc_pub_port",      1,      0,  0  },
+    {"rpc_prv_port",      1,      0,  0  },
+    {"seed_ip_port",      1,      0,  0  },
+    {"pub_key_path",      1,      0,  0  },
+    {"prv_key_path",      1,      0,  0  },
+    {"drop_keys",         0,      0,  0  },
+    {0, 0, 0, 0}
+  };
+  
+  bool drop_keys = false;
+  while (1) {
+    int c = getopt_long(argc, argv, "", long_options, &option_index);
+    if (c == -1) break;
+    
+    switch (option_index) {
+      case 0:
+        RPC_PUB_PORT = atoi(optarg);
+        break;
+      case 1:
+        RPC_PRV_PORT = atoi(optarg);
+        break;
+      case 2:
+        seed_ip_port = optarg;
+        break;
+      case 3:
+        pub_key_path = optarg;
+        break;
+      case 4:
+        prv_key_path = optarg;
+        break;
+      case 5:
+        drop_keys = true;
+        break;
+    }
+  }
+  
+  if (drop_keys) {
+    printf("drop keys\n");
+    remove(pub_key_path.c_str());
+    remove(prv_key_path.c_str());
+  }
+
   {
     struct ifaddrs * ifAddrStruct=NULL;
     struct ifaddrs * ifa=NULL;
@@ -101,79 +156,52 @@ int main() {
     }
     if (ifAddrStruct!=NULL) freeifaddrs(ifAddrStruct);
   }
-  LOOKT_write_lookup_table_to_flash();
-  gms_init();
   
-  // unsigned char seed[32] = {0};
-  // if (ed25519_create_seed(seed)) {
-  //   printf("error while generating seed\n");
-  //   exit(1);
-  // }
-  // ed25519_create_keypair(my_pub_key.b, my_prv_key.b, seed);
-  my_primary_address = 0;
-  my_pub_key = genesis_pub_key;
-  my_prv_key = genesis_priv_key_FUCK_WE_CANT_SEND_FILE_IN_OUR_SOLUTION_TO_GENESIS_NODE_FUUUUUUUUUUUUUUUUUUU;
+  FOR_COL(it, gns.node_list) {
+    if (*it == seed_ip_port) {
+      i_am_seed_node = true;
+    }
+  }
   
+  bool pub_exists = file_exists(pub_key_path);
+  bool prv_exists = file_exists(prv_key_path);
+  if (pub_exists && prv_exists) {
+    // read
+    printf("load keys\n");
+    if (!file_load(pub_key_path, my_pub_key.b, t_pub_key_size)) {
+      printf("failed to load pub key\n");
+      return 1;
+    }
+    if (!file_load(prv_key_path, my_prv_key.b, t_prv_key_size)) {
+      printf("failed to load prv key\n");
+      return 1;
+    }
+  } else if (!pub_exists && !prv_exists)  {
+    // create
+    printf("generate keys\n");
+    if (!key_gen(my_pub_key, my_prv_key)) {
+      printf("error while generating keypair");
+      return 1;
+    }
+    printf("save keys\n");
+    if (!file_save(pub_key_path, my_pub_key.b, t_pub_key_size)) {
+      printf("failed to save pub key\n");
+      return 1;
+    }
+    if (!file_save(prv_key_path, my_prv_key.b, t_prv_key_size)) {
+      printf("failed to save prv key\n");
+      return 1;
+    }
+  } else {
+    printf("invalid situation\n");
+    printf("pub_key %s\n", pub_exists?"present":"missing");
+    printf("prv_key %s\n", prv_exists?"present":"missing");
+    return 1;
+  }
+  if (i_am_seed_node) {
+    gms_init();
+  }
   
-  // unsigned char public_key[32];
-  // unsigned char private_key[64];
-  // 
-  // unsigned char seed[32] = {0};
-  // unsigned char signature[64];
-  // unsigned char other_public_key[32], other_private_key[64], shared_secret[32];
-  // const unsigned char message[] = "TEST MESSAGE";
-  // const int len = strlen((const char*)message);
-  // 
-  // /* create a random seed, and a key pair out of that seed */
-  // if (ed25519_create_seed(seed)) {
-  //     printf("error while generating seed\n");
-  //     exit(1);
-  // }
-  // 
-  // ed25519_create_keypair(public_key, private_key, seed);
-  // 
-  // /* create signature on the message with the key pair */
-  // ed25519_sign(signature, message, len, public_key, private_key);
-  // 
-  // /* verify the signature */
-  // if (ed25519_verify(signature, message, len, public_key)) {
-  //     printf("valid signature\n");
-  // } else {
-  //     printf("invalid signature\n");
-  // }
-  // 
-  // /* create a dummy keypair to use for a key exchange, normally you'd only have
-  // the public key and receive it through some communication channel */
-  // if (ed25519_create_seed(seed)) {
-  //     printf("error while generating seed\n");
-  //     exit(1);
-  // }
-  // 
-  // ed25519_create_keypair(other_public_key, other_private_key, seed);
-  // 
-  // /* do a key exchange with other_public_key */
-  // ed25519_key_exchange(shared_secret, other_public_key, private_key);
-
-  /* 
-      the magic here is that ed25519_key_exchange(shared_secret, public_key,
-      other_private_key); would result in the same shared_secret
-  */
-  // for(int i1=0;i1<32;i1++) {
-  //   for(int i2=0;i2<8;i2++) {
-  //     for(int i3=0;i3<10;i3++) {
-  //       printf("%d ", base[i1][i2].yplusx[i3]);
-  //     }
-  //     printf("\n");
-  //     for(int i3=0;i3<10;i3++) {
-  //       printf("%d ", base[i1][i2].yminusx[i3]);
-  //     }
-  //     printf("\n");
-  //     for(int i3=0;i3<10;i3++) {
-  //       printf("%d ", base[i1][i2].xy2d[i3]);
-  //     }
-  //     printf("\n");
-  //   }
-  // }
   HttpServer hs1(RPC_PRV_PORT);
   LocalServer s1(hs1, JSONRPC_SERVER_V1V2);
   HttpServer hs2(RPC_PUB_PORT);
@@ -182,10 +210,17 @@ int main() {
   s2.StartListening();
   printf("pub server port %d\n", RPC_PUB_PORT);
   printf("prv server port %d\n", RPC_PRV_PORT);
-  cout << "welcome to UTON HACK!" << endl;
+  printf("seed_ip_port___ %s\n", seed_ip_port.c_str());
+  printf("i_am_seed_node_ %d\n", i_am_seed_node);
+  printf("welcome to UTON HACK!\n");
   while(s1.work) {
-    block_emit();
-    this_thread::sleep_for(chrono::milliseconds(10));
+    if (!gms.ready) {
+      this_thread::sleep_for(chrono::milliseconds(1000));
+      printf("node is not ready bc_height = %d / %d\n", bc_height(), gms.target_bc_height);
+    } else {
+      block_emit();
+      this_thread::sleep_for(chrono::milliseconds(10));
+    }
   }
   s1.StopListening();
   s2.StopListening();
