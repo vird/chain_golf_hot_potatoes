@@ -183,6 +183,14 @@ void block_apply(Block &block) {
   }
   // лёгкий способ быстро просуммировать все tx_fee
   gms.balance[block.header.issuer_addr] += mining_reward + tx_fee*block.tx_list.size();
+  FOR_COL(it, gms.balance) {
+    if (*it == 0) continue;// do not write optimisation
+    if (*it > hot_potato_penalty) {
+      *it -= hot_potato_penalty;
+    } else {
+      *it = 0;
+    }
+  }
   // issue 1 addr
   gms_account_new(block.header.issuer_pub_key);
 }

@@ -85,5 +85,6 @@ struct Block {
   u64     weight = 0;
 };
 
-const u32 tx_fee = 1;
-const u32 mining_reward = 1;
+const u32 tx_fee = 10;
+const u32 mining_reward = 10;
+const u32 hot_potato_penalty = 1;
