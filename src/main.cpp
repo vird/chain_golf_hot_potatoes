@@ -41,7 +41,6 @@ using namespace Json;
 #include "block.cpp"
 #include "db.cpp"
 // net
-#include "net.hpp"
 #include "rpc_util.cpp"
 #include "rpc_server_local.cpp"
 #include "rpc_server_global.cpp"
@@ -216,14 +215,21 @@ int main(int argc, char **argv) {
       printf("node is not ready bc_height = %d / %d\n", bc_height(), gms.target_bc_height);
     } else {
       // block propose
-      block_emit();
-      // TODO subticks here
-      // this_thread::sleep_for(chrono::milliseconds(10));
-      
-      // FOR DEBUG
-      this_thread::sleep_for(chrono::milliseconds(100));
+      block_propose();
+      // subticks
+      for(int i=0;i<5;i++) {
+        net_tick();
+        // с таким количеством как мы срем... 10 ms это мало
+        this_thread::sleep_for(chrono::milliseconds(10));
+      }
       // block commit
-      
+      // Все кто хотел должны были уже договориться...
+      printf("new block %d\n", gms.proposed_block.header.id);
+      if (!gms.is_proposal_valid) {
+        throw new Exception("bad assert gms.is_proposal_valid");
+      }
+      block_apply(gms.proposed_block);
+      gms.is_proposal_valid = false;
     }
   }
   s1.StopListening();

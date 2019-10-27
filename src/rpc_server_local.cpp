@@ -288,6 +288,7 @@ class LocalServer : public AbstractServer<LocalServer> {
     str2t_prv_key(hex_prv_key, prv_key);
     
     if (gms.a2pk[address] != pub_key) {
+      printf("debug_set_keyI %d\n", address);
       t_pub_key_print("pub_key           = ", pub_key);
       t_pub_key_print("gms.a2pk[address] = ", gms.a2pk[address]);
       response = "fail";

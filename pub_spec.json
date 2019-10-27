@@ -102,7 +102,7 @@
     ]
   },
   {
-    "name" : "block_push",
+    "name" : "proposed_block_push",
     "params": {
       "header": {
         "header" : {

@@ -1,4 +1,5 @@
 #include "db.hpp"
+#include "net.hpp"
 // single block
 int block_pack_size(Block &block) {
   int res = 0;
@@ -37,7 +38,16 @@ void gms_init() {
   gms.ready = true;
 }
 
-void block_emit() {
+void proposed_block_replace(Block &block) {
+  if (!gms.is_proposal_valid || gms.proposed_block.header.hash > block.header.hash) {
+    // так заходи в гости
+    gms.is_proposal_valid = true;
+    gms.proposed_block = block;
+    // И пусть все узнают
+    block_broadcast();
+  }
+}
+void block_propose() {
   if (!gms.ready) return;
   auto last = gms.main_chain_block_list.back();
   Block block;
@@ -55,8 +65,10 @@ void block_emit() {
   if (!block_validate(block)) {
     throw new Exception("block validation failed for our own block");
   }
-  block_apply(block);
-  if (block.header.id % 100 == 0) {
-    printf("block id=%d\n", block.header.id);
-  }
+  proposed_block_replace(block);
+  // block_apply(block);
+  // if (block.header.id % 100 == 0) {
+    // printf("block id=%d\n", block.header.id);
+  // }
 }
+

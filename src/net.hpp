@@ -9,6 +9,9 @@ struct NetNode {
   Block proposed_block;
 };
 struct NetState {
-  u32 offset = 0;
+  u32 ask_offset = 0;
+  u32 broadcast_offset = 0;
   vector<NetNode> node_list;
 } gns;
+
+void block_broadcast();

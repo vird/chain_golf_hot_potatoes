@@ -25,6 +25,7 @@ struct MemState {
   // tx prepared by this node
   vector<Tx> tx_list;
   
+  bool is_proposal_valid = false;
   Block proposed_block;
   unordered_map<string, Tx> done_tx_hash;
   // address_to_pub_key

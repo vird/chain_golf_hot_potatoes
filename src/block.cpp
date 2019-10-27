@@ -66,6 +66,21 @@ void block_header_to_json(Block_header &header, Value &value) {
   value["weight"]         = header.weight                       ;
 }
 
+bool json_to_block_header(const Value &value, Block_header &header) {
+  bool res = true;
+  header.id                            = value["id"].asInt()     ;
+  header.version                       = value["version"].asInt();
+  res &= str2t_hash(value["prev_hash"  ].asString(), header.prev_hash  );
+  res &= str2t_hash(value["merkle_tree"].asString(), header.merkle_tree);
+  header.issuer_addr                   = value["issuer_addr"].asInt();
+  res &= str2t_pub_key(value["issuer_pub_key"].asString(), header.issuer_pub_key);
+  header.nonce                         = value["nonce"].asInt()  ;
+  res &= str2t_hash(value["hash"       ].asString(), header.hash       );
+  res &= str2t_sign(value["sign"       ].asString(), header.sign       );
+  header.weight                        = value["weight"].asInt() ;
+  return res;
+}
+
 // SIGN_LEN
 #define SL2 \
   const int len = (                                                     \
@@ -149,6 +164,17 @@ void tx_to_json(Tx &tx, Value &value) {
   value["bind_pub_key"]= t_pub_key2str(tx.bind_pub_key);
   value["nonce"]    = tx.nonce     ;
 }
+bool json_to_tx(const Value &value, Tx &tx) {
+  bool res = true;
+  
+  tx.type       = value["type"].asInt()      ;
+  tx.amount     = value["amount"].asInt()    ;
+  tx.send_addr  = value["send_addr"].asInt() ;
+  tx.recv_addr  = value["recv_addr"].asInt() ;
+  res &= str2t_pub_key(value["bind_pub_key"].asString(), tx.bind_pub_key);
+  tx.nonce      = value["nonce"].asInt()     ;
+  return res;
+}
 
 // block
 void merkle_tree_calc(vector<Tx> &tx_list, t_hash &res) {
@@ -219,4 +245,18 @@ void block_to_json(Block &block, Value &value) {
   value["header"] = header;
   value["tx_list"] = tx_list;
   value["weight"] = block.weight;
+}
+
+bool json_to_block(const Value &value, Block &block) {
+  bool res = true;
+  res &= json_to_block_header(value["header"], block.header);
+  
+  Value tx_list = value["tx_list"];
+  u32 i=0,len=tx_list.size();
+  block.tx_list.resize(len);
+  for(;i<len;i++) {
+    res &= json_to_tx(tx_list[i], block.tx_list[i]);
+  }
+  block.weight = value["weight"].asInt();
+  return res;
 }

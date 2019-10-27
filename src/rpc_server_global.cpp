@@ -34,6 +34,18 @@ class GlobalServer : public AbstractServer<GlobalServer> {
         "rev_ip_port", JSON_STRING,
           NULL),
       &GlobalServer::handshakeI);
+    bindAndAddMethod(Procedure(
+      "get_proposed_block", PARAMS_BY_NAME, JSON_OBJECT,
+          NULL),
+      &GlobalServer::get_proposed_blockI);
+    bindAndAddMethod(Procedure(
+      "proposed_block_push", PARAMS_BY_NAME, JSON_STRING,
+        "header", JSON_OBJECT,
+        "tx_list", JSON_ARRAY,
+        "hash", JSON_STRING,
+        "sign", JSON_STRING,
+          NULL),
+      &GlobalServer::proposed_block_pushI);
     // БОЛЬ
     
     bindAndAddMethod(Procedure(
@@ -103,6 +115,20 @@ class GlobalServer : public AbstractServer<GlobalServer> {
       node.ip_port = rev_ip_port;
       gns.node_list.push_back(node);
     }
+    
+    response = "ok";
+  }
+  void get_proposed_blockI(const Value &request, Value &response) {
+    block_to_json(gms.proposed_block, response);
+  }
+  void proposed_block_pushI(const Value &request, Value &response) {
+    Block block;
+    if (!json_to_block(request, block)) {
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "Invalid block json");
+    }
+    proposed_block_replace(block);
     
     response = "ok";
   }

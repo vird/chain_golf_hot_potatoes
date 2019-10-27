@@ -5,6 +5,8 @@
     u8 b[size_] = {0};                                                                  \
   };                                                                                    \
   bool operator!=(const name& a, const name& b){return memcmp(a.b, b.b, sizeof(a.b));}  \
+  bool operator<(const name& a, const name& b){return memcmp(a.b, b.b, sizeof(a.b)<0);} \
+  bool operator>(const name& a, const name& b){return memcmp(a.b, b.b, sizeof(a.b)>0);} \
   bool str2##name(const string &str, name &key) {                                       \
     const u32 L = 2*size_;                                                              \
     if (str.size() != L) {                                                              \
