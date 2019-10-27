@@ -16,6 +16,7 @@ curl --data-binary '{"id":1,"jsonrpc":"2.0","method":"transfer","params":{"from_
 curl --data-binary '{"id":1,"jsonrpc":"2.0","method":"get_balance","params":{"address":"0"}}' -H 'content-type:text/plain;' http://localhost:10002
 curl --data-binary '{"id":1,"jsonrpc":"2.0","method":"get_balance","params":{"address":"1"}}' -H 'content-type:text/plain;' http://localhost:10002
 curl --data-binary '{"id":1,"jsonrpc":"2.0","method":"get_balance","params":{"address":"2"}}' -H 'content-type:text/plain;' http://localhost:10002
+echo -n "fail*" && curl --data-binary '{"id":1,"jsonrpc":"2.0","method":"transfer","params":{"from_address":"0", "to_address": "1", "amount":100}}' -H 'content-type:text/plain;' http://localhost:10002
 # fail
 echo -n "FAIL " && curl --data-binary '{"id":1,"jsonrpc":"2.0","method":"transfer","params":{"from_address":"0", "to_address": "100000002", "amount":100}}' -H 'content-type:text/plain;' http://localhost:10002
 echo -n "FAIL " && curl --data-binary '{"id":1,"jsonrpc":"2.0","method":"transfer","params":{"from_address":"100000002", "to_address": "1", "amount":100}}' -H 'content-type:text/plain;' http://localhost:10002

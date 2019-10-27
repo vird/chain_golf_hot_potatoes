@@ -121,7 +121,8 @@ bool tx_validate(Tx &tx) {
   t_hash cmp_hash;
   sha512_final(&ctx, (u8*)&cmp_hash);
   if (cmp_hash != tx.hash) RET(3)
-  if (!ed25519_verify(tx.sign.b, (u8*)&buffer, len, send_pub_key.b)) RET(4)
+  if (gms.done_tx_hash.find(string((char*)&tx.hash.b)) != gms.done_tx_hash.end()) RET(4)
+  if (!ed25519_verify(tx.sign.b, (u8*)&buffer, len, send_pub_key.b)) RET(5)
   return true;
 }
 
@@ -137,6 +138,7 @@ void tx_apply(Tx &tx) {
       gms.a2pk[tx.recv_addr] = tx.bind_pub_key;
       break;
   }
+  gms.done_tx_hash[string((char*)&tx.hash.b)] = tx;
 }
 
 void tx_to_json(Tx &tx, Value &value) {

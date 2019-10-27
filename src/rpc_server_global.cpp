@@ -15,6 +15,19 @@ class GlobalServer : public AbstractServer<GlobalServer> {
       "get_block_number", PARAMS_BY_NAME, JSON_OBJECT,
         NULL),
       &GlobalServer::get_block_numberI);
+    bindAndAddMethod(Procedure(
+      "tx_push", PARAMS_BY_NAME, JSON_OBJECT,
+            "type"          , JSON_INTEGER,
+            "amount"        , JSON_INTEGER,
+            "send_addr"     , JSON_STRING,
+            "recv_addr"     , JSON_STRING,
+            "bind_pub_key"  , JSON_STRING,
+            "tx_epoch"      , JSON_INTEGER,
+            "nonce"         , JSON_INTEGER,
+            "hash"          , JSON_STRING,
+            "sign"          , JSON_STRING,
+        NULL),
+      &GlobalServer::tx_pushI);
     // pub only
     bindAndAddMethod(Procedure(
       "handshake", PARAMS_BY_NAME, JSON_STRING,
@@ -53,6 +66,10 @@ class GlobalServer : public AbstractServer<GlobalServer> {
   
   void get_block_numberI(const Value &request, Value &response) {
     rpc_get_block_number(request, response);
+  }
+  
+  void tx_pushI(const Value &request, Value &response) {
+    rpc_tx_push(request, response);
   }
   
   // NOTE can exhaust memory.
@@ -188,21 +205,6 @@ class GlobalServer : public AbstractServer<GlobalServer> {
       return;
       // throw JsonRpcException(-2, "you don't own address");
     }
-    string hex_pub_key = request["pub_key"].asString();
-    if (hex_pub_key.size() != 2*t_pub_key_size) {
-      response = "fail";
-      return;
-      // throw JsonRpcException(-1, "bad pub_key size");
-    }
-    for(int i=0;i<2*t_pub_key_size;i++) {
-      char ch = hex_pub_key[i];
-      if ('0' <= ch && ch <= '9') continue;
-      if ('a' <= ch && ch <= 'f') continue;
-      if ('A' <= ch && ch <= 'A') continue;
-      response = "fail";
-      return;
-      // throw JsonRpcException(-1, "bad pub_key hex");
-    }
     
     Tx tx;
     tx.type     = 2;
@@ -210,7 +212,12 @@ class GlobalServer : public AbstractServer<GlobalServer> {
     tx.send_addr= my_primary_address;
     tx.recv_addr= address;
     
-    str2t_pub_key(hex_pub_key, tx.bind_pub_key);
+    string pub_key = request["pub_key"].asString();
+    if (!str2t_pub_key(pub_key, tx.bind_pub_key)) {
+      response = "fail";
+      return;
+      // throw JsonRpcException(-1, "bad pub_key");
+    }
     tx.nonce    = 0;
     tx_sign(tx, my_pub_key, my_prv_key);
     
@@ -221,7 +228,7 @@ class GlobalServer : public AbstractServer<GlobalServer> {
       // throw JsonRpcException(-9, "tx_validate fail");
     }
     
-    printf("address transfer owner=%d address=%d pub_key=%s\n", my_primary_address, address, hex_pub_key.c_str());
+    printf("address transfer owner=%d address=%d pub_key=%s\n", my_primary_address, address, pub_key.c_str());
     
     gms.tx_list.push_back(tx);
     

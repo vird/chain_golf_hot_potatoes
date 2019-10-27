@@ -128,6 +128,32 @@
     "returns": "ok/fail"
   },
   {
+    "name" : "get_proposed_block",
+    "params": {}
+    "returns": {
+      "header": {
+        "header" : {
+          "block header TBD" : "block header TBD"
+        },
+        "tx_list" : [
+          {
+            "type"      : 0,
+            "amount"    : 0,
+            "send_addr" : "address",
+            "recv_addr" : "address",
+            "bind_pub_key" : "pub_key",
+            "tx_epoch"  : 0,
+            "nonce"     : 0,
+            "hash"      : "hash",
+            "sign"      : "sign"
+          }
+        ],
+        "hash" : "hash",
+        "sign" : "sign"
+      }
+    }
+  },
+  {
     "name" : "tx_push",
     "params": {
       "type"      : 0,

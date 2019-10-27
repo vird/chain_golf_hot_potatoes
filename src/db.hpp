@@ -22,9 +22,11 @@ struct MemState {
   // TODO Block hash -> map
   u32 main_chain_block_offset = 0;
   vector<Block> main_chain_block_list;
-  // tx pool
+  // tx prepared by this node
   vector<Tx> tx_list;
   
+  Block proposed_block;
+  unordered_map<string, Tx> done_tx_hash;
   // address_to_pub_key
   vector<t_pub_key> a2pk;
   // analog PascalCoin safebox

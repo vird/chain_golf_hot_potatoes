@@ -1,18 +1,31 @@
-#define T_ARR(name, size) \
-  const u32 name##_size = size;                                                         \
+#define T_ARR(name, size_) \
+  const u32 name##_size = size_;                                                        \
+  typedef u8 name##_buf[size_];                                                         \
   struct name {                                                                         \
-    u8 b[size] = {0};                                                                   \
+    u8 b[size_] = {0};                                                                  \
   };                                                                                    \
   bool operator!=(const name& a, const name& b){return memcmp(a.b, b.b, sizeof(a.b));}  \
-  void str2##name(string &str, name &key) {                                             \
+  bool str2##name(const string &str, name &key) {                                       \
+    const u32 L = 2*size_;                                                              \
+    if (str.size() != L) {                                                              \
+      return false;                                                                     \
+    }                                                                                   \
+    for(int i=0;i<L;i++) {                                                              \
+      char ch = str[i];                                                                 \
+      if ('0' <= ch && ch <= '9') continue;                                             \
+      if ('a' <= ch && ch <= 'f') continue;                                             \
+      if ('A' <= ch && ch <= 'A') continue;                                             \
+      return false;                                                                     \
+    }                                                                                   \
     char tmp[3] = {0};                                                                  \
     char *tmp_p;                                                                        \
     u32 dst = 0;                                                                        \
-    for(int i=0;i<2*name##_size;) {                                                     \
+    for(int i=0;i<L;) {                                                                 \
       tmp[0] = str[i++];                                                                \
       tmp[1] = str[i++];                                                                \
       key.b[dst++] = strtol((char*)&tmp, &tmp_p, 16);                                   \
     }                                                                                   \
+    return true;                                                                        \
   }                                                                                     \
   string name##2str(name &t) {                                                          \
     string res = "";                                                                    \

@@ -14,6 +14,7 @@
 #include<stdint.h>
 #include<algorithm>
 #include<vector>
+#include<unordered_map>
 #include<cstring>
 #include<getopt.h>
 #define FOR_COL(it, arr) for(auto it = arr.begin(), end = arr.end(); it != end; ++it)
@@ -214,10 +215,15 @@ int main(int argc, char **argv) {
       this_thread::sleep_for(chrono::milliseconds(1000));
       printf("node is not ready bc_height = %d / %d\n", bc_height(), gms.target_bc_height);
     } else {
+      // block propose
       block_emit();
+      // TODO subticks here
       // this_thread::sleep_for(chrono::milliseconds(10));
+      
       // FOR DEBUG
       this_thread::sleep_for(chrono::milliseconds(100));
+      // block commit
+      
     }
   }
   s1.StopListening();
