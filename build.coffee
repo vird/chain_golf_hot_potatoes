@@ -165,6 +165,8 @@ main = unpack_include main
 if argv.jsonrpc_debug
   main = main.replace /return;[\n\s]+\/\/ throw/g, 'throw'
 
+main = main.replace /carry/g, 'L'
+
 main = compact_preprocessor main
 process.chdir '..'
 
@@ -230,6 +232,7 @@ hard_replace "httpserver", "hs"
 # JSON
 soft_replace "JSON_STRING", "JS"
 # reserved words
+soft_replace "return", "E"
 soft_replace "virtual", "V"
 hard_replace "NULL", "0"
 hard_replace "false", "0"

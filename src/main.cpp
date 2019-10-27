@@ -20,6 +20,7 @@
 
 using namespace std;
 using namespace jsonrpc;
+using namespace jsonrpc;
 using namespace Json;
 // cryptography
 #include "ed25519.h"
@@ -67,8 +68,9 @@ void rpc_get_block_number(const Value &request, Value &response) {
   }
   block_to_json(gms.main_chain_block_list[id], response);
 }
-#include "local_rpc.cpp"
-#include "global_rpc.cpp"
+#include "rpc_server_local.cpp"
+#include "rpc_server_global.cpp"
+#include "rpc_client.cpp"
 
 int main(int argc, char **argv) {
   // ed25519 calc table
